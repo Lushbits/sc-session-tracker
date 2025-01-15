@@ -41,9 +41,7 @@ export function useChartData(session: Session): UseChartDataReturn {
     )
 
     // Generate data points for each event
-    sortedEvents.forEach(event => {
-      const prevBalance = currentBalance
-      
+    sortedEvents.forEach(event => {      
       if (event.type === 'balance') {
         currentBalance = event.amount
       } else if (event.type === 'earning') {
