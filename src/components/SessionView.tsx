@@ -92,7 +92,6 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
           onSpendDialogChange={setShowSpendDialog}
           onEarningDialogChange={setShowEarningDialog}
           onBalanceDialogChange={setShowBalanceDialog}
-          onUpdateBalance={handleUpdateBalance}
         />
 
         <EndSessionDialog
@@ -101,7 +100,6 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
           onOpenChange={setShowEndSessionDialog}
           onEndSession={onEndSession}
           onAddEvent={handleAddEvent}
-          onUpdateBalance={handleUpdateBalance}
         />
       </div>
     </div>
