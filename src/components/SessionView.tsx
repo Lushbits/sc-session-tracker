@@ -29,7 +29,7 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
     Boolean(session.endTime)
   )
 
-  const { currentBalance, handleAddEvent, handleUpdateBalance } = useSessionEvents(session, onUpdateSession)
+  const { currentBalance, handleAddEvent } = useSessionEvents(session, onUpdateSession)
   const stats = useSessionStats(session, elapsedTime)
   const { chartData, hoveredEventTime, setHoveredEventTime } = useChartData(session)
 
