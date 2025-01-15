@@ -14,12 +14,13 @@ function formatElapsedTime(eventTime: Date, startTime: Date): string {
 interface SessionEventProps {
   event: Event
   runningBalance: number
+  prevBalance: number
   isHighlighted: boolean
   onHover: (time: string | null) => void
   startTime: Date
 }
 
-export function SessionEvent({ event, runningBalance, isHighlighted, onHover, startTime }: SessionEventProps) {
+export function SessionEvent({ event, runningBalance, prevBalance, isHighlighted, onHover, startTime }: SessionEventProps) {
   const elapsedTime = formatElapsedTime(event.timestamp, startTime)
 
   const renderEventContent = () => {
@@ -27,21 +28,20 @@ export function SessionEvent({ event, runningBalance, isHighlighted, onHover, st
       case 'session_start':
         return (
           <div className="flex items-center">
-            <span className="text-white">Starting balance: {event.amount.toLocaleString()} aUEC</span>
+            <span className="text-white">Starting balance: <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
           </div>
         )
       case 'session_end':
         return (
           <div className="flex items-center">
-            <span className="text-white">Ending balance: {event.amount.toLocaleString()} aUEC</span>
+            <span className="text-white">Ending balance: <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
           </div>
         )
       case 'earning':
         return (
           <div className="flex items-center space-x-1">
             <span className="text-green-500">Earned</span>
-            <span className="text-green-500">{event.amount.toLocaleString()}</span>
-            <span className="text-green-500">aUEC</span>
+            <span className="text-green-500 font-bold">{event.amount.toLocaleString()} aUEC</span>
             {event.description && (
               <span className="text-gray-400">from {event.description}</span>
             )}
@@ -51,27 +51,24 @@ export function SessionEvent({ event, runningBalance, isHighlighted, onHover, st
         return (
           <div className="flex items-center space-x-1">
             <span className="text-red-500">Spent</span>
-            <span className="text-red-500">{event.amount.toLocaleString()}</span>
-            <span className="text-red-500">aUEC</span>
+            <span className="text-red-500 font-bold">{event.amount.toLocaleString()} aUEC</span>
             {event.description && (
               <span className="text-gray-400">on {event.description}</span>
             )}
           </div>
         )
       case 'balance':
-        const difference = event.amount - runningBalance
+        const difference = event.amount - prevBalance
         return (
           <div className="flex items-center space-x-1">
-            <span className="text-cyan-500">Balance adjusted to {event.amount.toLocaleString()} aUEC</span>
-            {difference !== 0 && (
-              <span>
-                <span>(</span>
-                <span className={difference > 0 ? 'text-green-500' : 'text-red-500'}>
-                  {difference > 0 ? '+' : '-'}{Math.abs(difference).toLocaleString()} aUEC
-                </span>
-                <span>)</span>
+            <span className="text-cyan-500">Balance adjusted to <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
+            <span>
+              <span>(</span>
+              <span className={difference > 0 ? 'text-green-500' : 'text-red-500'}>
+                <span className="font-bold">{difference > 0 ? '+' : '-'}{Math.abs(difference).toLocaleString()} aUEC</span>
               </span>
-            )}
+              <span>)</span>
+            </span>
           </div>
         )
     }
@@ -90,7 +87,7 @@ export function SessionEvent({ event, runningBalance, isHighlighted, onHover, st
         {renderEventContent()}
       </div>
       <div className="flex items-center text-gray-400">
-        <span>{runningBalance.toLocaleString()}</span>
+        <span className="font-bold">{runningBalance.toLocaleString()}</span>
         <span className="ml-1">aUEC</span>
       </div>
     </div>

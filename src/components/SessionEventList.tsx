@@ -27,16 +27,12 @@ export function SessionEventList({ events, startTime, initialBalance, hoveredEve
   )
 
   // Calculate running balance for each event according to the prompt specifications
-  const getBalanceAtEvent = (events: Event[], targetIndex: number): number => {
-    // For the target event, we want the balance AFTER this event
-    // This helps us show the correct running balance
+  const getBalancesForEvent = (events: Event[], targetIndex: number): { prevBalance: number, currentBalance: number } => {
     let balance = initialBalance
     
-    // Process events from oldest to target (inclusive)
-    // We're calculating the balance up to and including the target event
-    for (let i = 0; i <= targetIndex; i++) {
+    // Calculate balance before the event
+    for (let i = 0; i < targetIndex; i++) {
       const event = events[i]
-      
       if (event.type === 'earning') {
         balance += event.amount
       } else if (event.type === 'spending') {
@@ -44,10 +40,21 @@ export function SessionEventList({ events, startTime, initialBalance, hoveredEve
       } else if (event.type === 'balance') {
         balance = event.amount
       }
-      // session_start and session_end don't affect the balance
     }
     
-    return balance
+    const prevBalance = balance
+    
+    // Apply the current event
+    const currentEvent = events[targetIndex]
+    if (currentEvent.type === 'earning') {
+      balance += currentEvent.amount
+    } else if (currentEvent.type === 'spending') {
+      balance -= currentEvent.amount
+    } else if (currentEvent.type === 'balance') {
+      balance = currentEvent.amount
+    }
+    
+    return { prevBalance, currentBalance: balance }
   }
 
   // Reverse events for display (newest first)
@@ -55,19 +62,24 @@ export function SessionEventList({ events, startTime, initialBalance, hoveredEve
 
   return (
     <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-800">
-      {displayEvents.map((event, index) => (
-        <SessionEvent
-          key={`${event.timestamp.getTime()}-${index}`}
-          event={event}
-          runningBalance={getBalanceAtEvent(sortedEvents, sortedEvents.length - 1 - index)}
-          isHighlighted={hoveredEventTime === event.timestamp.getTime().toString() || localHoveredEventTime === event.timestamp.getTime().toString()}
-          onHover={(time) => {
-            setLocalHoveredEventTime(time)
-            onHover(time)
-          }}
-          startTime={startTime}
-        />
-      ))}
+      {displayEvents.map((event, index) => {
+        const eventIndex = sortedEvents.length - 1 - index
+        const { prevBalance, currentBalance } = getBalancesForEvent(sortedEvents, eventIndex)
+        return (
+          <SessionEvent
+            key={`${event.timestamp.getTime()}-${index}`}
+            event={event}
+            prevBalance={prevBalance}
+            runningBalance={currentBalance}
+            isHighlighted={hoveredEventTime === event.timestamp.getTime().toString() || localHoveredEventTime === event.timestamp.getTime().toString()}
+            onHover={(time) => {
+              setLocalHoveredEventTime(time)
+              onHover(time)
+            }}
+            startTime={startTime}
+          />
+        )
+      })}
     </div>
   )
 } 

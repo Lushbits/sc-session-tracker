@@ -25,8 +25,10 @@ export function useSessionStats(
     for (const event of sortedEvents) {
       if (event.type === 'earning') {
         totalEarnings += event.amount
+        lastBalance += event.amount
       } else if (event.type === 'spending') {
         totalSpend += event.amount
+        lastBalance -= event.amount
       } else if (event.type === 'balance') {
         // Calculate difference from last balance and add to appropriate total
         const difference = event.amount - lastBalance

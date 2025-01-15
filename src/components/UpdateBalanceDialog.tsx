@@ -96,7 +96,6 @@ export function UpdateBalanceDialog({
     const numBalance = parseFloat(state.newBalance.replace(/,/g, ''))
     if (!isNaN(numBalance)) {
       onAddEvent('balance', numBalance)
-      onUpdateBalance(numBalance)
       onOpenChange(false)
       setState({
         newBalance: '',

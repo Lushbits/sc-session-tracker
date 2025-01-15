@@ -45,7 +45,6 @@ export function EndSessionDialog({
     if (!isNaN(numBalance)) {
       // Create a balance event for the final balance
       onAddEvent('balance', numBalance)
-      onUpdateBalance(numBalance)
       onEndSession()
     }
   }
