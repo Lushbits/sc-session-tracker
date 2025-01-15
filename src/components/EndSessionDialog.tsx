@@ -11,7 +11,6 @@ interface EndSessionDialogProps {
   onOpenChange: (open: boolean) => void
   onEndSession: () => void
   onAddEvent: (type: Event['type'], amount: number, description?: string) => void
-  onUpdateBalance: (balance: number) => void
 }
 
 export function EndSessionDialog({
@@ -19,8 +18,7 @@ export function EndSessionDialog({
   isOpen,
   onOpenChange,
   onEndSession,
-  onAddEvent,
-  onUpdateBalance
+  onAddEvent
 }: EndSessionDialogProps) {
   const [finalBalance, setFinalBalance] = useState('')
 

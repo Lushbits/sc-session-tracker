@@ -14,7 +14,6 @@ interface UpdateBalanceDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   onAddEvent: (type: Event['type'], amount: number, description?: string) => void
-  onUpdateBalance: (balance: number) => void
 }
 
 interface DialogState {
@@ -27,8 +26,7 @@ export function UpdateBalanceDialog({
   currentBalance,
   isOpen,
   onOpenChange,
-  onAddEvent,
-  onUpdateBalance
+  onAddEvent
 }: UpdateBalanceDialogProps) {
   const [state, setState] = useState<DialogState>({
     newBalance: '',

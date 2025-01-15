@@ -11,7 +11,6 @@ interface SessionDialogsProps {
   onSpendDialogChange: (open: boolean) => void
   onEarningDialogChange: (open: boolean) => void
   onBalanceDialogChange: (open: boolean) => void
-  onUpdateBalance: (balance: number) => void
 }
 
 export function SessionDialogs({
@@ -22,8 +21,7 @@ export function SessionDialogs({
   onAddEvent,
   onSpendDialogChange,
   onEarningDialogChange,
-  onBalanceDialogChange,
-  onUpdateBalance
+  onBalanceDialogChange
 }: SessionDialogsProps) {
   return (
     <>
@@ -44,7 +42,6 @@ export function SessionDialogs({
         onAddEvent={onAddEvent}
         isOpen={showBalanceDialog}
         onOpenChange={onBalanceDialogChange}
-        onUpdateBalance={onUpdateBalance}
       />
     </>
   )
