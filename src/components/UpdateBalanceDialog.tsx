@@ -60,9 +60,9 @@ export function UpdateBalanceDialog({
     
     if (!isNaN(numBalance)) {
       if (difference > 0) {
-        onAddEvent('earning', numBalance, category)
+        onAddEvent('earning', difference, category)
       } else if (difference < 0) {
-        onAddEvent('spending', numBalance, category)
+        onAddEvent('spending', Math.abs(difference), category)
       }
       onOpenChange(false)
       setState({
@@ -79,9 +79,9 @@ export function UpdateBalanceDialog({
     
     if (!isNaN(numBalance) && state.customDescription) {
       if (difference > 0) {
-        onAddEvent('earning', numBalance, state.customDescription)
+        onAddEvent('earning', difference, state.customDescription)
       } else if (difference < 0) {
-        onAddEvent('spending', numBalance, state.customDescription)
+        onAddEvent('spending', Math.abs(difference), state.customDescription)
       }
       onOpenChange(false)
       setState({
