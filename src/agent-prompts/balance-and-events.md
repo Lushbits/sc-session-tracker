@@ -34,18 +34,18 @@
 1. Spending Events
    - Format: "Spent X aUEC on [Category]" with spaces between elements
    - Word "Spent" in red text
-   - Amount (X) in red text (this is the difference amount)
+   - Amount (X) in red text (this is event.amount)
    - "aUEC" in red text
    - "on [Category]" in gray text
-   - Running balance in gray text (this is event.amount)
+   - Running balance in gray text (calculated from all previous events)
 
 2. Earning Events
    - Format: "Earned X aUEC from [Category]" with spaces between elements
    - Word "Earned" in green text
-   - Amount (X) in green text (this is the difference amount)
+   - Amount (X) in green text (this is event.amount)
    - "aUEC" in green text
    - "from [Category]" in gray text
-   - Running balance in gray text (this is event.amount)
+   - Running balance in gray text (calculated from all previous events)
 
 3. Balance Adjustments
    - Format: "Balance adjusted to X aUEC (±Y aUEC)"
@@ -53,7 +53,7 @@
    - Difference (Y) in parentheses:
      - Positive difference in green with '+' prefix
      - Negative difference in red with '-' prefix
-   - Running balance in gray text (this is event.amount)
+   - Running balance in gray text (calculated from all previous events)
 
 4. Session Start
    - Format: "Starting balance: X aUEC"
@@ -66,16 +66,19 @@
    - Running balance in gray text (this is event.amount)
 
 ### Event Amount Consistency
-For all event types, event.amount represents the total balance at the time of the event:
-- For spending events: The new lower balance after the spending
-- For earning events: The new higher balance after the earning
+For all event types, event.amount represents the transaction amount:
+- For spending events: The amount spent (positive number)
+- For earning events: The amount earned (positive number)
 - For balance adjustments: The new balance value
 - For session start: The initial balance
 - For session end: The final balance
 
 ### Running Balance Calculation
-- No calculation needed as each event stores its resulting balance in event.amount
-- The running balance shown for each event is simply event.amount
+- Running balance is calculated by processing events chronologically:
+  - For earning events: Add event.amount to previous balance
+  - For spending events: Subtract event.amount from previous balance
+  - For balance adjustments: Set balance to event.amount
+  - Session start/end events don't affect the balance
 - Always displayed with thousands separator (e.g., "100,000 aUEC")
 
 ## Event List Styling
@@ -117,10 +120,10 @@ Tooltip Styling:
 - Balance line shows "Balance: X aUEC" in gray 
 
 ### Event Amount and Display Logic
-- event.amount always stores the total balance after the event
+- event.amount stores the actual transaction amount for earning/spending events
 - For display purposes:
-  - Earning events: Show difference (event.amount - previous balance) in the event text
-  - Spending events: Show difference (previous balance - event.amount) in the event text
+  - Earning events: Show event.amount in the event text
+  - Spending events: Show event.amount in the event text
   - Balance adjustments: Show new total (event.amount) and difference in parentheses
-  - Running balance (right side): Always show event.amount
+  - Running balance (right side): Calculated by processing all events chronologically
   - Tooltip follows the same display logic as the list view 

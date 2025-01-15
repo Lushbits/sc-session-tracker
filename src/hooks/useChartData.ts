@@ -42,10 +42,14 @@ export function useChartData(session: Session): UseChartDataReturn {
 
     // Generate data points for each event
     sortedEvents.forEach(event => {
+      const prevBalance = currentBalance
+      
       if (event.type === 'balance') {
         currentBalance = event.amount
-      } else {
-        currentBalance += event.type === 'earning' ? event.amount : -event.amount
+      } else if (event.type === 'earning') {
+        currentBalance += event.amount
+      } else if (event.type === 'spending') {
+        currentBalance -= event.amount
       }
       
       const elapsed = event.timestamp.getTime() - session.startTime.getTime()
@@ -57,7 +61,7 @@ export function useChartData(session: Session): UseChartDataReturn {
         balance: currentBalance,
         type: event.type,
         description: event.description,
-        amount: event.amount
+        amount: event.amount // This is the actual event amount, not the balance
       })
     })
 

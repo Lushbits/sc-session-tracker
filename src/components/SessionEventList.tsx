@@ -28,13 +28,13 @@ export function SessionEventList({ events, startTime, initialBalance, hoveredEve
 
   // Calculate running balance for each event according to the prompt specifications
   const getBalanceAtEvent = (events: Event[], targetIndex: number): number => {
-    // For the target event, we want the balance BEFORE this event
-    // This helps us show the correct running balance and calculate differences
+    // For the target event, we want the balance AFTER this event
+    // This helps us show the correct running balance
     let balance = initialBalance
     
-    // Process events from oldest to target (exclusive)
-    // We're calculating the balance up to but not including the target event
-    for (let i = 0; i < targetIndex; i++) {
+    // Process events from oldest to target (inclusive)
+    // We're calculating the balance up to and including the target event
+    for (let i = 0; i <= targetIndex; i++) {
       const event = events[i]
       
       if (event.type === 'earning') {

@@ -66,11 +66,23 @@ function App() {
   const { user, signOut } = useAuth()
   const { fetchSessions, createSession, updateSession, deleteSession, addEvent } = useDatabase()
   const [sessions, setSessions] = useState<Session[]>([])
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(() => {
+    // Initialize from localStorage if available
+    return localStorage.getItem('activeSessionId')
+  })
   const [isStartModalOpen, setIsStartModalOpen] = useState(false)
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Update localStorage when activeSessionId changes
+    if (activeSessionId) {
+      localStorage.setItem('activeSessionId', activeSessionId)
+    } else {
+      localStorage.removeItem('activeSessionId')
+    }
+  }, [activeSessionId])
 
   useEffect(() => {
     if (user) {
@@ -117,7 +129,7 @@ function App() {
           endTime: new Date()
         })
         await loadSessions()
-        setActiveSessionId(null)
+        setActiveSessionId(null)  // This will also clear localStorage
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to end session')
       }
@@ -168,7 +180,7 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="sc-theme">
         <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4">
           <div className="w-full max-w-sm space-y-6">
-            <h1 className="text-2xl font-bold text-center">Star Citizen Earnings Tracker</h1>
+            <h1 className="text-2xl font-bold text-center">SC Session Tracker</h1>
             <LoginForm />
           </div>
         </div>
@@ -181,9 +193,16 @@ function App() {
       <div className="min-h-screen bg-background text-foreground">
         <header className="border-b border-border">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Star Citizen Earnings Tracker</h1>
+            <h1 className="text-2xl font-bold">SC Session Tracker</h1>
             <div className="flex items-center gap-4">
               <ThemeToggle />
+              {user.user_metadata?.avatar_url && (
+                <img 
+                  src={user.user_metadata.avatar_url} 
+                  alt="User avatar" 
+                  className="w-8 h-8 rounded-full"
+                />
+              )}
               <Button variant="outline" onClick={() => signOut()}>
                 Sign Out
               </Button>

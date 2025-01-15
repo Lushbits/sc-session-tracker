@@ -40,7 +40,7 @@ export function SessionEvent({ event, runningBalance, isHighlighted, onHover, st
         return (
           <div className="flex items-center space-x-1">
             <span className="text-green-500">Earned</span>
-            <span className="text-green-500">{(event.amount - runningBalance).toLocaleString()}</span>
+            <span className="text-green-500">{event.amount.toLocaleString()}</span>
             <span className="text-green-500">aUEC</span>
             {event.description && (
               <span className="text-gray-400">from {event.description}</span>
@@ -51,7 +51,7 @@ export function SessionEvent({ event, runningBalance, isHighlighted, onHover, st
         return (
           <div className="flex items-center space-x-1">
             <span className="text-red-500">Spent</span>
-            <span className="text-red-500">{(runningBalance - event.amount).toLocaleString()}</span>
+            <span className="text-red-500">{event.amount.toLocaleString()}</span>
             <span className="text-red-500">aUEC</span>
             {event.description && (
               <span className="text-gray-400">on {event.description}</span>
@@ -90,7 +90,7 @@ export function SessionEvent({ event, runningBalance, isHighlighted, onHover, st
         {renderEventContent()}
       </div>
       <div className="flex items-center text-gray-400">
-        <span>{event.amount.toLocaleString()}</span>
+        <span>{runningBalance.toLocaleString()}</span>
         <span className="ml-1">aUEC</span>
       </div>
     </div>

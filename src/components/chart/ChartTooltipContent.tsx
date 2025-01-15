@@ -35,20 +35,18 @@ export function ChartTooltipContent({ payload, chartData, formatTime }: ChartToo
     }
     
     if (point.type === 'earning') {
-      const earnedAmount = point.balance - (prevPoint?.balance ?? point.balance)
       return (
         <div style={tooltipStyles.itemStyle}>
-          {timeStr} - <span className="text-green-500">Earned {earnedAmount.toLocaleString()} aUEC</span>
+          {timeStr} - <span className="text-green-500">Earned {point.amount.toLocaleString()} aUEC</span>
           {point.description && <span className="text-gray-400"> from {point.description}</span>}
         </div>
       )
     }
     
     if (point.type === 'spending') {
-      const spentAmount = (prevPoint?.balance ?? point.balance) - point.balance
       return (
         <div style={tooltipStyles.itemStyle}>
-          {timeStr} - <span className="text-red-500">Spent {spentAmount.toLocaleString()} aUEC</span>
+          {timeStr} - <span className="text-red-500">Spent {point.amount.toLocaleString()} aUEC</span>
           {point.description && <span className="text-gray-400"> on {point.description}</span>}
         </div>
       )
