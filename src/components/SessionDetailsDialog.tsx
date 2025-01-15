@@ -72,7 +72,6 @@ export function SessionDetailsDialog({
             startTime={session.startTime}
             initialBalance={session.initialBalance}
             hoveredEventTime={hoveredEventTime}
-            formatTime={(timestamp) => formatShortTime(timestamp, session.startTime)}
             onHover={setHoveredEventTime}
           />
         </div>

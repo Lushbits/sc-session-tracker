@@ -80,7 +80,6 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
           startTime={session.startTime}
           initialBalance={session.initialBalance}
           hoveredEventTime={hoveredEventTime}
-          formatTime={(timestamp) => formatShortTime(timestamp, session.startTime)}
           onHover={setHoveredEventTime}
         />
 

@@ -150,7 +150,8 @@ function App() {
   const handleUpdateSession = async (updatedSession: Session) => {
     try {
       await updateSession(updatedSession)
-      if (updatedSession.events.length > sessions.find(s => s.id === updatedSession.id)?.events.length) {
+      const existingSession = sessions.find(s => s.id === updatedSession.id)
+      if (existingSession && updatedSession.events.length > existingSession.events.length) {
         const latestEvent = updatedSession.events[updatedSession.events.length - 1]
         await addEvent(updatedSession.id, latestEvent)
       }

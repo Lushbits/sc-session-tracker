@@ -7,11 +7,10 @@ interface SessionEventListProps {
   startTime: Date
   initialBalance: number
   hoveredEventTime: string | null
-  formatTime: (timestamp: Date) => string
   onHover: (time: string | null) => void
 }
 
-export function SessionEventList({ events, startTime, initialBalance, hoveredEventTime, formatTime, onHover }: SessionEventListProps) {
+export function SessionEventList({ events, startTime, initialBalance, hoveredEventTime, onHover }: SessionEventListProps) {
   const [localHoveredEventTime, setLocalHoveredEventTime] = useState<string | null>(null)
 
   // Create initial balance event
