@@ -19,17 +19,37 @@ interface SessionListProps {
 
 export default function SessionList({ sessions, onDeleteSession, onViewSessionDetails }: SessionListProps) {
   const getSessionStats = (session: Session) => {
-    const totalEarnings = session.events
-      .filter(event => event.type === 'earning')
-      .reduce((sum, event) => sum + event.amount, 0)
+    let totalEarnings = 0
+    let totalSpend = 0
+    let lastBalance = session.initialBalance
 
-    const totalSpend = session.events
-      .filter(event => event.type === 'spending')
-      .reduce((sum, event) => sum + event.amount, 0)
+    // Sort events chronologically
+    const sortedEvents = [...session.events].sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    )
+
+    for (const event of sortedEvents) {
+      if (event.type === 'earning') {
+        totalEarnings += event.amount
+        lastBalance += event.amount
+      } else if (event.type === 'spending') {
+        totalSpend += event.amount
+        lastBalance -= event.amount
+      } else if (event.type === 'balance') {
+        // Calculate difference from last balance and add to appropriate total
+        const difference = event.amount - lastBalance
+        if (difference > 0) {
+          totalEarnings += difference
+        } else if (difference < 0) {
+          totalSpend += Math.abs(difference)
+        }
+        lastBalance = event.amount
+      }
+    }
 
     const profit = totalEarnings - totalSpend
     const elapsed = ((session.endTime?.getTime() || new Date().getTime()) - session.startTime.getTime())
-    const elapsedHours = elapsed / 3600000 // hours
+    const elapsedHours = Math.max(elapsed / 3600000, 0.001) // Convert to hours, avoid division by zero
     const profitPerHour = Math.round(profit / elapsedHours)
 
     const duration = intervalToDuration({ start: session.startTime, end: session.endTime || new Date() })

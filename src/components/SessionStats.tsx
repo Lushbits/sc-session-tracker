@@ -14,7 +14,8 @@ interface SessionStatsProps {
     totalSpend: number
     sessionProfit: number
   }
-  onUpdateBalance: () => void
+  onUpdateBalance?: () => void
+  hideUpdateBalance?: boolean
 }
 
 /**
@@ -27,29 +28,32 @@ export function SessionStats({
   currentBalance,
   stats,
   onUpdateBalance,
+  hideUpdateBalance
 }: SessionStatsProps) {
   return (
     <div className="flex items-center justify-between">
       {/* Current balance with update button */}
       <div className="flex items-center gap-2">
         <div className="text-4xl font-bold">{currentBalance.toLocaleString()} aUEC</div>
-        <TooltipProvider>
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onUpdateBalance()}
-                className="h-8 w-8"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Update Balance</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {!hideUpdateBalance && onUpdateBalance && (
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onUpdateBalance}
+                  className="h-8 w-8"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Update Balance</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
 
       {/* Session statistics in a row */}

@@ -56,7 +56,7 @@ export function SessionDetailsDialog({
           <SessionStats
             currentBalance={session.events[session.events.length - 1]?.amount || session.initialBalance}
             stats={stats}
-            onUpdateBalance={() => {}}
+            hideUpdateBalance
           />
 
           <SessionChart
