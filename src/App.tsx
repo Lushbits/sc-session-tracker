@@ -29,6 +29,7 @@ export interface Session {
   endTime?: Date
   initialBalance: number
   events: Event[]
+  sessionLog?: string
 }
 
 export type Event = {
@@ -121,18 +122,24 @@ function App() {
     }
   }
 
-  const handleEndSession = async () => {
+  const handleEndSession = async (sessionLog?: string) => {
     const activeSession = getActiveSession()
     if (activeSession) {
       try {
-        await updateSession({
+        // First update the session
+        const updatedSession = {
           ...activeSession,
-          endTime: new Date()
-        })
+          endTime: new Date(),
+          sessionLog: sessionLog === '' ? undefined : sessionLog
+        }
+        await updateSession(updatedSession)
+        // Then reload sessions and clear active session
         await loadSessions()
         setActiveSessionId(null)  // This will also clear localStorage
       } catch (error) {
+        console.error('Error ending session:', error)
         setError(error instanceof Error ? error.message : 'Failed to end session')
+        throw error // Re-throw to propagate to the dialog
       }
     }
   }
@@ -162,19 +169,46 @@ function App() {
 
   const handleUpdateSession = async (updatedSession: Session) => {
     try {
+      // First update the session details
       await updateSession(updatedSession)
+
+      // Then check if we need to add a new event
       const existingSession = sessions.find(s => s.id === updatedSession.id)
       if (existingSession && updatedSession.events.length > existingSession.events.length) {
+        // Get the latest event that was added
         const latestEvent = updatedSession.events[updatedSession.events.length - 1]
+        // Add the event to the database
         await addEvent(updatedSession.id, latestEvent)
       }
+
+      // Finally reload the sessions to get the updated state
       await loadSessions()
     } catch (error) {
+      console.error('Failed to update session:', error)
       setError(error instanceof Error ? error.message : 'Failed to update session')
+      throw error // Re-throw to propagate to the dialog
     }
   }
 
   const activeSession = getActiveSession()
+
+  const getLastCompletedSessionBalance = () => {
+    const completedSessions = sessions.filter(s => s.endTime)
+    if (completedSessions.length === 0) return undefined
+    
+    // Sort by end time, newest first
+    const sortedSessions = completedSessions.sort((a, b) => 
+      new Date(b.endTime!).getTime() - new Date(a.endTime!).getTime()
+    )
+    
+    // Get the last balance from the most recent session
+    const lastSession = sortedSessions[0]
+    const sortedEvents = [...lastSession.events].sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    )
+    
+    return sortedEvents[sortedEvents.length - 1]?.amount || lastSession.initialBalance
+  }
 
   if (!user) {
     return (
@@ -250,6 +284,7 @@ function App() {
           isOpen={isStartModalOpen}
           onClose={() => setIsStartModalOpen(false)}
           onStart={handleStartSession}
+          lastSessionBalance={getLastCompletedSessionBalance()}
         />
 
         <SessionDetailsDialog

@@ -41,6 +41,7 @@ export type Database = {
           start_time: string
           end_time: string | null
           initial_balance: number
+          session_log: string | null
           created_at: string
         }
         Insert: {
@@ -50,6 +51,7 @@ export type Database = {
           start_time: string
           end_time?: string | null
           initial_balance: number
+          session_log?: string | null
           created_at?: string
         }
         Update: {
@@ -59,6 +61,7 @@ export type Database = {
           start_time?: string
           end_time?: string | null
           initial_balance?: number
+          session_log?: string | null
           created_at?: string
         }
       }

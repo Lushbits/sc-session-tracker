@@ -20,12 +20,15 @@ export function useDatabase() {
 
     if (error) throw error
 
-    return data.map((session: any) => ({
+    console.log('Raw session data from DB:', data)
+
+    const mappedSessions = data.map((session: any) => ({
       id: session.id,
       description: session.description,
       startTime: new Date(session.start_time),
       endTime: session.end_time ? new Date(session.end_time) : undefined,
       initialBalance: session.initial_balance,
+      sessionLog: session.session_log || undefined,
       events: session.events.map((event: any) => ({
         timestamp: new Date(event.timestamp),
         amount: event.amount,
@@ -33,6 +36,9 @@ export function useDatabase() {
         description: event.description
       }))
     }))
+
+    console.log('Mapped sessions:', mappedSessions)
+    return mappedSessions
   }, [user])
 
   const createSession = useCallback(async (session: Omit<Session, 'id' | 'events'>) => {
@@ -57,16 +63,29 @@ export function useDatabase() {
   const updateSession = useCallback(async (session: Session) => {
     if (!user) throw new Error('User not authenticated')
 
+    // Only include session_log when ending the session
+    const updateData: any = {
+      description: session.description
+    }
+
+    // Only add end_time and session_log if we're ending the session
+    if (session.endTime) {
+      updateData.end_time = session.endTime.toISOString()
+      updateData.session_log = session.sessionLog || null
+    }
+
+    console.log('Updating session with data:', updateData)
+
     const { error } = await supabase
       .from('sessions')
-      .update({
-        description: session.description,
-        end_time: session.endTime?.toISOString()
-      })
+      .update(updateData)
       .eq('id', session.id)
       .eq('user_id', user.id)
 
-    if (error) throw error
+    if (error) {
+      console.error('Database error updating session:', error)
+      throw new Error(`Failed to update session: ${error.message}`)
+    }
   }, [user])
 
   const deleteSession = useCallback(async (sessionId: string) => {
@@ -84,17 +103,25 @@ export function useDatabase() {
   const addEvent = useCallback(async (sessionId: string, event: Omit<Event, 'id'>) => {
     if (!user) throw new Error('User not authenticated')
 
+    const eventData = {
+      session_id: sessionId,
+      timestamp: event.timestamp.toISOString(),
+      amount: event.amount,
+      type: event.type,
+      description: event.description || null
+    }
+
+    // Log the event creation
+    console.log('Adding event:', eventData)
+
     const { error } = await supabase
       .from('events')
-      .insert({
-        session_id: sessionId,
-        timestamp: event.timestamp.toISOString(),
-        amount: event.amount,
-        type: event.type,
-        description: event.description
-      })
+      .insert(eventData)
 
-    if (error) throw error
+    if (error) {
+      console.error('Database error adding event:', error)
+      throw new Error(`Failed to add event: ${error.message}`)
+    }
   }, [user])
 
   return {

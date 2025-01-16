@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog'
 import { Button } from './ui/button'
 import { Event } from '../App'
@@ -35,6 +35,16 @@ export function UpdateBalanceDialog({
     isCustomMode: false,
     customDescription: ''
   })
+
+  useEffect(() => {
+    if (!isOpen) {
+      setState({
+        newBalance: '',
+        isCustomMode: false,
+        customDescription: ''
+      })
+    }
+  }, [isOpen])
 
   const handleBalanceChange = (value: string) => {
     if (state.isCustomMode) return
@@ -95,7 +105,6 @@ export function UpdateBalanceDialog({
   const handleSimpleUpdate = () => {
     const numBalance = parseFloat(state.newBalance.replace(/,/g, ''))
     if (!isNaN(numBalance)) {
-      onAddEvent('balance', numBalance)
       onUpdateBalance(numBalance)
       onOpenChange(false)
       setState({

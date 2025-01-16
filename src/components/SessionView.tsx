@@ -105,4 +105,4 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
       </div>
     </div>
   )
-}
+} 

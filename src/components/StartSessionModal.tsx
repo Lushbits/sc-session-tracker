@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from './ui/button'
 import {
   Dialog,
@@ -15,15 +15,25 @@ interface StartSessionModalProps {
   isOpen: boolean
   onClose: () => void
   onStart: (description: string, initialBalance: number) => void
+  lastSessionBalance?: number
 }
 
 export default function StartSessionModal({
   isOpen,
   onClose,
   onStart,
+  lastSessionBalance
 }: StartSessionModalProps) {
   const [description, setDescription] = useState('')
   const [initialBalance, setInitialBalance] = useState('')
+
+  // Reset form and prepopulate balance when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setDescription('')
+      setInitialBalance(lastSessionBalance ? lastSessionBalance.toLocaleString() : '')
+    }
+  }, [isOpen, lastSessionBalance])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

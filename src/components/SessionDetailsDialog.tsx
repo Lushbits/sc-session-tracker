@@ -21,6 +21,9 @@ export function SessionDetailsDialog({
 }: SessionDetailsDialogProps) {
   if (!session) return null
 
+  console.log('Session in details dialog:', session)
+  console.log('Session log:', session.sessionLog)
+
   const elapsedTime = session.endTime 
     ? session.endTime.getTime() - session.startTime.getTime()
     : new Date().getTime() - session.startTime.getTime()
@@ -58,6 +61,15 @@ export function SessionDetailsDialog({
             stats={stats}
             hideUpdateBalance
           />
+
+          {session.sessionLog && (
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Session Summary</h3>
+              <div className="text-sm text-muted-foreground whitespace-pre-wrap rounded-md bg-muted/50 p-4">
+                {session.sessionLog}
+              </div>
+            </div>
+          )}
 
           <SessionChart
             chartData={chartData}
