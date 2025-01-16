@@ -14,10 +14,10 @@ interface ChartDotProps {
  */
 export function getDotColor(type: string) {
   switch (type) {
-    case 'earning': return '#22C55E' // green for earnings
-    case 'spending': return '#EF4444' // red for spending
-    case 'balance': return '#0EA5E9' // cyan for balance updates
-    default: return '#60A5FA' // blue fallback
+    case 'earning': return `hsl(var(--event-earning))`
+    case 'spending': return `hsl(var(--event-spending))`
+    case 'balance': return `hsl(var(--event-balance-adjust))`
+    default: return `hsl(var(--primary))`
   }
 }
 
@@ -37,9 +37,9 @@ export function ChartDot({ cx, cy, payload, hoveredEventTime }: ChartDotProps) {
     <circle
       cx={cx}
       cy={cy}
-      r={isHovered ? 10 : 6} // Increased both normal and hover radius
+      r={isHovered ? 10 : 6}
       fill={getDotColor(payload.type)}
-      stroke={isHovered ? "#fff" : "none"} // White border on hover
+      stroke={isHovered ? "hsl(var(--foreground))" : "none"}
       strokeWidth={2}
     />
   )

@@ -59,6 +59,7 @@ export function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="bg-background border-2"
           />
         </div>
         <div className="space-y-2">
@@ -69,6 +70,7 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="bg-background border-2"
           />
         </div>
 
@@ -100,7 +102,7 @@ export function LoginForm() {
       <Button
         type="button"
         variant="outline"
-        className="w-full"
+        className="w-full bg-[#5865f2] hover:bg-[#4752c4] text-white border-0"
         onClick={handleDiscordLogin}
       >
         <svg

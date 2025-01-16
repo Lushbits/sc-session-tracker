@@ -48,16 +48,13 @@ export default function SessionList({ sessions, onDeleteSession, onViewSessionDe
     }
 
     const profit = totalEarnings - totalSpend
-    const elapsed = ((session.endTime?.getTime() || new Date().getTime()) - session.startTime.getTime())
-    const elapsedHours = Math.max(elapsed / 3600000, 0.001) // Convert to hours, avoid division by zero
-    const profitPerHour = Math.round(profit / elapsedHours)
-
     const duration = intervalToDuration({ start: session.startTime, end: session.endTime || new Date() })
     const formattedDuration = formatDuration(duration, { format: ['hours', 'minutes'] })
 
     return {
+      totalEarnings,
+      totalSpend,
       profit,
-      profitPerHour,
       duration: formattedDuration || 'Less than a minute'
     }
   }
@@ -80,8 +77,9 @@ export default function SessionList({ sessions, onDeleteSession, onViewSessionDe
       <TableHeader>
         <TableRow>
           <TableHead>Session</TableHead>
+          <TableHead className="text-right">Earnings</TableHead>
+          <TableHead className="text-right">Spend</TableHead>
           <TableHead className="text-right">Profit</TableHead>
-          <TableHead className="text-right">Profit/Hour</TableHead>
           <TableHead className="text-right">Duration</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
@@ -101,16 +99,21 @@ export default function SessionList({ sessions, onDeleteSession, onViewSessionDe
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                <span className={stats.profit >= 0 ? 'text-green-500' : 'text-red-500'}>
+                <span className="event-earning">
+                  +{stats.totalEarnings.toLocaleString()} aUEC
+                </span>
+              </TableCell>
+              <TableCell className="text-right">
+                <span className="event-spending">
+                  -{stats.totalSpend.toLocaleString()} aUEC
+                </span>
+              </TableCell>
+              <TableCell className="text-right">
+                <span className={stats.profit >= 0 ? 'event-earning' : 'event-spending'}>
                   {stats.profit >= 0 ? '+' : ''}{stats.profit.toLocaleString()} aUEC
                 </span>
               </TableCell>
               <TableCell className="text-right">
-                <span className={stats.profitPerHour >= 0 ? 'text-green-500' : 'text-red-500'}>
-                  {stats.profitPerHour >= 0 ? '+' : ''}{stats.profitPerHour.toLocaleString()} aUEC
-                </span>
-              </TableCell>
-              <TableCell className="text-right font-mono">
                 {stats.duration}
               </TableCell>
               <TableCell className="text-right">

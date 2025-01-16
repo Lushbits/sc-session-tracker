@@ -10,6 +10,7 @@ import { SessionDetailsDialog } from './components/SessionDetailsDialog'
 import { useDatabase } from './hooks/useDatabase'
 import { useAuth } from './contexts/AuthContext'
 import { LoginForm } from './components/auth/LoginForm'
+import { Footer } from './components/Footer'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -178,11 +179,14 @@ function App() {
   if (!user) {
     return (
       <ThemeProvider defaultTheme="dark" storageKey="sc-theme">
-        <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4">
-          <div className="w-full max-w-sm space-y-6">
-            <h1 className="text-2xl font-bold text-center">SC Session Tracker</h1>
-            <LoginForm />
+        <div className="min-h-screen bg-background text-foreground flex flex-col">
+          <div className="flex-1 flex flex-col items-center justify-center p-4">
+            <div className="w-full max-w-sm space-y-6">
+              <h1 className="text-2xl font-bold text-center">SC Session Tracker</h1>
+              <LoginForm />
+            </div>
           </div>
+          <Footer />
         </div>
       </ThemeProvider>
     )
@@ -190,7 +194,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="sc-theme">
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen bg-background text-foreground flex flex-col">
         <header className="border-b border-border">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-bold">SC Session Tracker</h1>
@@ -210,7 +214,7 @@ function App() {
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-8">
+        <main className="flex-1 container mx-auto px-4 py-8">
           {error && (
             <div className="mb-4 p-4 bg-destructive/10 text-destructive rounded-lg">
               {error}
@@ -239,6 +243,8 @@ function App() {
             </div>
           )}
         </main>
+
+        <Footer />
 
         <StartSessionModal
           isOpen={isStartModalOpen}

@@ -35,7 +35,7 @@ export function BalanceInput({
       {difference !== 0 && (
         <div>
           <Label>Difference: </Label>
-          <span className={isEarning ? 'text-green-500' : 'text-red-500'}>
+          <span className={isEarning ? 'event-earning' : 'event-spending'}>
             {isEarning ? '+' : '-'}{Math.abs(difference).toLocaleString()} aUEC
           </span>
         </div>

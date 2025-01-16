@@ -19,31 +19,9 @@ export const chartStyles = {
   }
 }
 
-export const tooltipStyles = {
-  contentStyle: {
-    backgroundColor: 'hsl(var(--card))',
-    border: '1px solid hsl(var(--border))',
-    borderRadius: '0.5rem',
-    padding: '0.75rem',
-    boxShadow: '0 0 0 1px hsl(var(--border)), 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-    backdropFilter: 'blur(8px)',
-    WebkitBackdropFilter: 'blur(8px)',
-    background: 'hsl(var(--card) / 0.8)'
-  },
-  itemStyle: {
-    color: 'hsl(var(--foreground))',
-    fontFamily: 'Space Grotesk, sans-serif',
-    fontSize: '0.875rem',
-    padding: '0.25rem 0'
-  },
-  wrapperStyle: {
-    zIndex: 1000
-  }
-}
-
 export const profitDisplayStyles = {
-  label: "text-xs text-gray-400",
+  label: "text-xs text-muted-foreground",
   value: "text-base",
-  positive: "text-green-400",
-  negative: "text-red-400"
+  positive: "event-earning",
+  negative: "event-spending"
 } 

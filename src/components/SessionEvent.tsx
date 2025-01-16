@@ -1,15 +1,6 @@
 import { Event } from '../App'
-
-function formatElapsedTime(eventTime: Date, startTime: Date): string {
-  const elapsedMs = eventTime.getTime() - startTime.getTime()
-  const elapsedSecs = Math.floor(elapsedMs / 1000)
-  
-  const hours = Math.floor(elapsedSecs / 3600)
-  const minutes = Math.floor((elapsedSecs % 3600) / 60)
-  const seconds = elapsedSecs % 60
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-}
+import { Card, CardContent } from '../components/ui/card'
+import { formatElapsedTime } from '../utils/timeFormatting'
 
 interface SessionEventProps {
   event: Event
@@ -27,33 +18,37 @@ export function SessionEvent({ event, runningBalance, prevBalance, isHighlighted
     switch (event.type) {
       case 'session_start':
         return (
-          <div className="flex items-center">
-            <span className="text-white">Starting balance: <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
+          <div className="flex items-center space-x-1">
+            <span className="event-starting-balance">Starting balance: <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
           </div>
         )
       case 'session_end':
         return (
-          <div className="flex items-center">
-            <span className="text-white">Ending balance: <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
+          <div className="flex items-center space-x-1">
+            <span className="event-starting-balance">Ending balance: <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
           </div>
         )
       case 'earning':
         return (
           <div className="flex items-center space-x-1">
-            <span className="text-green-500">Earned</span>
-            <span className="text-green-500 font-bold">{event.amount.toLocaleString()} aUEC</span>
+            <span className="event-earning">Earned <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
             {event.description && (
-              <span className="text-gray-400">from {event.description}</span>
+              <>
+                <span className="text-muted-foreground">from</span>
+                <span className="text-muted-foreground">{event.description}</span>
+              </>
             )}
           </div>
         )
       case 'spending':
         return (
           <div className="flex items-center space-x-1">
-            <span className="text-red-500">Spent</span>
-            <span className="text-red-500 font-bold">{event.amount.toLocaleString()} aUEC</span>
+            <span className="event-spending">Spent <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
             {event.description && (
-              <span className="text-gray-400">on {event.description}</span>
+              <>
+                <span className="text-muted-foreground">on</span>
+                <span className="text-muted-foreground">{event.description}</span>
+              </>
             )}
           </div>
         )
@@ -61,10 +56,10 @@ export function SessionEvent({ event, runningBalance, prevBalance, isHighlighted
         const difference = event.amount - prevBalance
         return (
           <div className="flex items-center space-x-1">
-            <span className="text-cyan-500">Balance adjusted to <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
+            <span className="event-balance-adjust">Balance adjusted to <span className="font-bold">{event.amount.toLocaleString()} aUEC</span></span>
             <span>
               <span>(</span>
-              <span className={difference > 0 ? 'text-green-500' : 'text-red-500'}>
+              <span className={difference > 0 ? 'event-earning' : 'event-spending'}>
                 <span className="font-bold">{difference > 0 ? '+' : '-'}{Math.abs(difference).toLocaleString()} aUEC</span>
               </span>
               <span>)</span>
@@ -75,21 +70,21 @@ export function SessionEvent({ event, runningBalance, prevBalance, isHighlighted
   }
 
   return (
-    <div 
-      className={`flex justify-between items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${
-        isHighlighted ? 'bg-gray-100 dark:bg-gray-800' : ''
-      }`}
+    <Card 
+      className={`border-0 ${isHighlighted ? 'bg-muted' : 'hover:bg-muted/50'} transition-colors`}
       onMouseEnter={() => onHover(event.timestamp.getTime().toString())}
       onMouseLeave={() => onHover(null)}
     >
-      <div className="flex items-center">
-        <span className="text-gray-400 w-20">{elapsedTime}</span>
-        {renderEventContent()}
-      </div>
-      <div className="flex items-center text-gray-400">
-        <span className="font-bold">{runningBalance.toLocaleString()}</span>
-        <span className="ml-1">aUEC</span>
-      </div>
-    </div>
+      <CardContent className="flex justify-between items-center p-2">
+        <div className="flex items-center">
+          <span className="text-muted-foreground w-20">{elapsedTime}</span>
+          {renderEventContent()}
+        </div>
+        <div className="flex items-center text-muted-foreground">
+          <span className="font-bold">{runningBalance.toLocaleString()}</span>
+          <span className="ml-1">aUEC</span>
+        </div>
+      </CardContent>
+    </Card>
   )
 } 

@@ -72,8 +72,8 @@ export function EndSessionDialog({
           {getDifference() !== 0 && (
             <div>
               <Label>Difference: </Label>
-              <span className={getDifference() > 0 ? 'text-green-500' : 'text-red-500'}>
-                {getDifference() > 0 ? '+' : ''}{getDifference().toLocaleString()} aUEC
+              <span className={getDifference() > 0 ? 'event-earning' : 'event-spending'}>
+                {getDifference() > 0 ? '+' : '-'}{Math.abs(getDifference()).toLocaleString()} aUEC
               </span>
             </div>
           )}

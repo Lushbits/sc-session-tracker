@@ -29,7 +29,7 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
     Boolean(session.endTime)
   )
 
-  const { currentBalance, handleAddEvent } = useSessionEvents(session, onUpdateSession)
+  const { currentBalance, handleAddEvent, handleUpdateBalance } = useSessionEvents(session, onUpdateSession)
   const stats = useSessionStats(session, elapsedTime)
   const { chartData, hoveredEventTime, setHoveredEventTime } = useChartData(session)
 
@@ -49,8 +49,8 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
   }, [])
 
   return (
-    <div className="min-h-screen text-foreground p-6 font-['Space_Grotesk']">
-      <div className="max-w-7xl mx-auto space-y-4">
+    <div className="min-h-[70vh] text-foreground p-4 font-['Space_Grotesk']">
+      <div className="max-w-7xl mx-auto space-y-3">
         <SessionHeader
           elapsedTime={formattedTime}
           isPaused={isPaused}

@@ -2,7 +2,7 @@ import { LineChart, Line, Tooltip, ResponsiveContainer, XAxis, YAxis } from 'rec
 import { ChartDot } from './ChartDot'
 import { ChartTooltipContent } from './chart/ChartTooltipContent'
 import { ProfitDisplay } from './chart/ProfitDisplay'
-import { chartStyles, tooltipStyles } from './chart/chartConfig'
+import { chartStyles } from './chart/chartConfig'
 import { ChartDataPoint } from '../hooks/useChartData'
 import { formatSeconds } from '../utils/timeFormatting'
 
@@ -81,7 +81,7 @@ export function SessionChart({
                   formatTime={formatTime}
                 />
               )}
-              wrapperStyle={tooltipStyles.wrapperStyle}
+              wrapperStyle={{ outline: 'none' }}
             />
             <Line
               type="monotone"

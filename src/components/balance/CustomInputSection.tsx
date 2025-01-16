@@ -25,10 +25,7 @@ export function CustomInputSection({
       />
       <Button
         size="icon"
-        className={isEarning ? 
-          "bg-green-500 hover:bg-green-600" : 
-          "bg-red-500 hover:bg-red-600"
-        }
+        className={isEarning ? "category-button-earning" : "category-button-spending"}
         disabled={!value}
         onClick={onSubmit}
       >

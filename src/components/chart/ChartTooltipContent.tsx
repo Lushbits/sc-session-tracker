@@ -1,5 +1,5 @@
 import { ChartDataPoint } from '../../hooks/useChartData'
-import { tooltipStyles } from './chartConfig'
+import { Card, CardContent } from '../ui/card'
 
 interface ChartTooltipContentProps {
   payload?: any[]
@@ -11,8 +11,8 @@ export function ChartTooltipContent({ payload, chartData, formatTime }: ChartToo
   if (!payload?.[0]?.payload) return null
 
   const point = payload[0].payload as ChartDataPoint
-  const prevPoint = chartData[chartData.indexOf(point) - 1]
-  const difference = point.balance - (prevPoint?.balance ?? point.balance)
+  const pointIndex = chartData.findIndex(p => p.timestamp.getTime() === point.timestamp.getTime())
+  const prevPoint = pointIndex > 0 ? chartData[pointIndex - 1] : null
   
   const renderContent = () => {
     const timeStr = formatTime(point.timestamp)
@@ -20,63 +20,69 @@ export function ChartTooltipContent({ payload, chartData, formatTime }: ChartToo
 
     if (point.type === 'session_start') {
       return (
-        <div style={tooltipStyles.itemStyle}>
-          {timeStr} - Starting balance: <span className="text-white">{amountStr} aUEC</span>
+        <div className="flex items-center space-x-1">
+          <span>{timeStr} - Starting balance: <span className="text-white">{amountStr} aUEC</span></span>
         </div>
       )
     }
     
     if (point.type === 'session_end') {
       return (
-        <div style={tooltipStyles.itemStyle}>
-          {timeStr} - Ending balance: <span className="text-white">{amountStr} aUEC</span>
+        <div className="flex items-center space-x-1">
+          <span>{timeStr} - Ending balance: <span className="text-white">{amountStr} aUEC</span></span>
         </div>
       )
     }
     
     if (point.type === 'earning') {
       return (
-        <div style={tooltipStyles.itemStyle}>
-          {timeStr} - <span className="text-green-500">Earned {point.amount.toLocaleString()} aUEC</span>
-          {point.description && <span className="text-gray-400"> from {point.description}</span>}
+        <div className="flex items-center space-x-1">
+          <span>
+            {timeStr} - <span className="event-earning">Earned {point.amount.toLocaleString()} aUEC</span>
+            {point.description && <span className="text-muted-foreground"> from {point.description}</span>}
+          </span>
         </div>
       )
     }
     
     if (point.type === 'spending') {
       return (
-        <div style={tooltipStyles.itemStyle}>
-          {timeStr} - <span className="text-red-500">Spent {point.amount.toLocaleString()} aUEC</span>
-          {point.description && <span className="text-gray-400"> on {point.description}</span>}
+        <div className="flex items-center space-x-1">
+          <span>
+            {timeStr} - <span className="event-spending">Spent {point.amount.toLocaleString()} aUEC</span>
+            {point.description && <span className="text-muted-foreground"> on {point.description}</span>}
+          </span>
         </div>
       )
     }
     
     if (point.type === 'balance') {
+      const prevBalance = prevPoint?.balance ?? point.amount
+      const difference = point.amount - prevBalance
       return (
-        <div style={tooltipStyles.itemStyle}>
-          {timeStr} - <span className="text-cyan-500">Balance adjusted to {amountStr} aUEC</span>
-          {difference !== 0 && (
-            <span>
-              {' '}(<span className={difference > 0 ? 'text-green-500' : 'text-red-500'}>
-                {difference > 0 ? '+' : '-'}{Math.abs(difference).toLocaleString()} aUEC
-              </span>)
-            </span>
-          )}
+        <div className="flex items-center space-x-1">
+          <span>
+            {timeStr} - <span className="event-balance-adjust">Balance adjusted to {amountStr} aUEC</span>
+            {' '}(<span className={difference > 0 ? 'event-earning' : 'event-spending'}>
+              {difference > 0 ? '+' : ''}{difference.toLocaleString()} aUEC
+            </span>)
+          </span>
         </div>
       )
     }
-    
+
     // Default case - should never happen as all types are handled above
     return null
   }
 
   return (
-    <div style={tooltipStyles.contentStyle}>
-      {renderContent()}
-      <div style={tooltipStyles.itemStyle}>
-        Balance: <span className="text-gray-400">{point.balance.toLocaleString()} aUEC</span>
-      </div>
-    </div>
+    <Card className="border-0 bg-card/80 backdrop-blur-md">
+      <CardContent className="p-3 space-y-2">
+        {renderContent()}
+        <div className="text-muted-foreground">
+          Balance: <span>{point.balance.toLocaleString()} aUEC</span>
+        </div>
+      </CardContent>
+    </Card>
   )
 } 

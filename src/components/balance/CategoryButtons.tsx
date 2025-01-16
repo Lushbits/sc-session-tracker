@@ -15,8 +15,8 @@ export function CategoryButtons({
   onCustomClick
 }: CategoryButtonsProps) {
   const buttonColorClass = isEarning ? 
-    "bg-green-500 hover:bg-green-600 text-white" : 
-    "bg-red-500 hover:bg-red-600 text-white"
+    "category-button-earning" : 
+    "category-button-spending"
 
   return (
     <div>
@@ -25,7 +25,7 @@ export function CategoryButtons({
         {categories.map(category => (
           <Button
             key={category}
-            variant="ghost"
+            variant="default"
             className={buttonColorClass}
             onClick={() => onSelect(category)}
           >
@@ -33,7 +33,7 @@ export function CategoryButtons({
           </Button>
         ))}
         <Button
-          variant="ghost"
+          variant="default"
           className={`col-span-2 ${buttonColorClass}`}
           onClick={onCustomClick}
         >

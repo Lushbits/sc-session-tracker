@@ -60,17 +60,17 @@ export function SessionStats({
       <div className="flex items-center gap-8">
         <div>
           <div className="text-xs text-gray-400 text-right">Total Earnings</div>
-          <div className="text-base text-green-400 text-right">{stats.totalEarnings.toLocaleString()} aUEC</div>
+          <div className="text-base event-earning text-right">{stats.totalEarnings.toLocaleString()} aUEC</div>
         </div>
 
         <div>
           <div className="text-xs text-gray-400 text-right">Total Spend</div>
-          <div className="text-base text-red-400 text-right">{stats.totalSpend.toLocaleString()} aUEC</div>
+          <div className="text-base event-spending text-right">{stats.totalSpend.toLocaleString()} aUEC</div>
         </div>
 
         <div>
           <div className="text-xs text-gray-400 text-right">Session Profit</div>
-          <div className={`text-base text-right ${stats.sessionProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+          <div className={`text-base text-right ${stats.sessionProfit >= 0 ? 'event-earning' : 'event-spending'}`}>
             {stats.sessionProfit >= 0 ? '+' : ''}{stats.sessionProfit.toLocaleString()} aUEC
           </div>
         </div>

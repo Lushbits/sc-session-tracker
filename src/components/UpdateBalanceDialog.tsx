@@ -147,8 +147,8 @@ export function UpdateBalanceDialog({
           </Button>
           {difference !== 0 && !state.isCustomMode && (
             <Button
-              variant="ghost"
-              className="bg-cyan-500 hover:bg-cyan-600 text-white"
+              variant="default"
+              className="balance-adjust-button"
               onClick={handleSimpleUpdate}
             >
               Just Update Balance
