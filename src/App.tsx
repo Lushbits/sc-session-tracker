@@ -194,8 +194,8 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="sc-theme">
-      <div className="min-h-screen bg-background text-foreground flex flex-col">
-        <header className="border-b border-border">
+      <div className="min-h-screen text-foreground flex flex-col">
+        <header className="border-b border-border bg-background">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-bold">SC Session Tracker</h1>
             <div className="flex items-center gap-4">

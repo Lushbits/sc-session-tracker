@@ -64,7 +64,6 @@ export function UpdateBalanceDialog({
       } else if (difference < 0) {
         onAddEvent('spending', Math.abs(difference), category)
       }
-      onUpdateBalance(numBalance)
       onOpenChange(false)
       setState({
         newBalance: '',
@@ -84,7 +83,6 @@ export function UpdateBalanceDialog({
       } else if (difference < 0) {
         onAddEvent('spending', Math.abs(difference), state.customDescription)
       }
-      onUpdateBalance(numBalance)
       onOpenChange(false)
       setState({
         newBalance: '',

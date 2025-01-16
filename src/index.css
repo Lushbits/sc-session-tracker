@@ -81,6 +81,14 @@
     --event-earning: 142 69% 50%;
     --event-spending: 7 62% 49%;
     --event-balance-adjust: 202 34% 50%;
+
+    /* Custom gradient background */
+    --gradient-start: 240 17% 5%;
+    --gradient-end: 202 34% 10%;
+
+    /* Header and footer backgrounds */
+    --header-bg: 240 17% 5%;
+    --footer-bg: 240 17% 5%;
   }
 }
 
@@ -88,13 +96,42 @@
   * {
     @apply border-border;
   }
+  
+  /* Root gradient background */
+  :root {
+    min-height: 100vh;
+  }
+
+  .dark {
+    background: linear-gradient(135deg, 
+      hsl(var(--gradient-start)) 0%,
+      hsl(var(--gradient-end)) 100%
+    ) fixed;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-family: var(--font-sans);
+    min-height: 100vh;
+    margin: 0;
   }
+
   .font-mono {
     font-family: var(--font-mono);
+  }
+
+  /* Header and footer styles */
+  header {
+    background-color: hsl(var(--header-bg));
+    position: relative;
+    z-index: 10;
+  }
+
+  footer {
+    background-color: hsl(var(--footer-bg));
+    position: relative;
+    z-index: 10;
   }
 }
 
