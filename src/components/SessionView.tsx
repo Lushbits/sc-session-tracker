@@ -89,6 +89,7 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
           showEarningDialog={showEarningDialog}
           showBalanceDialog={showBalanceDialog}
           onAddEvent={handleAddEvent}
+          onUpdateBalance={handleUpdateBalance}
           onSpendDialogChange={setShowSpendDialog}
           onEarningDialogChange={setShowEarningDialog}
           onBalanceDialogChange={setShowBalanceDialog}

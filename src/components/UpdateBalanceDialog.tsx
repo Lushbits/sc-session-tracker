@@ -14,6 +14,7 @@ interface UpdateBalanceDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   onAddEvent: (type: Event['type'], amount: number, description?: string) => void
+  onUpdateBalance: (newBalance: number) => void
 }
 
 interface DialogState {
@@ -26,7 +27,8 @@ export function UpdateBalanceDialog({
   currentBalance,
   isOpen,
   onOpenChange,
-  onAddEvent
+  onAddEvent,
+  onUpdateBalance
 }: UpdateBalanceDialogProps) {
   const [state, setState] = useState<DialogState>({
     newBalance: '',
@@ -62,6 +64,7 @@ export function UpdateBalanceDialog({
       } else if (difference < 0) {
         onAddEvent('spending', Math.abs(difference), category)
       }
+      onUpdateBalance(numBalance)
       onOpenChange(false)
       setState({
         newBalance: '',
@@ -81,6 +84,7 @@ export function UpdateBalanceDialog({
       } else if (difference < 0) {
         onAddEvent('spending', Math.abs(difference), state.customDescription)
       }
+      onUpdateBalance(numBalance)
       onOpenChange(false)
       setState({
         newBalance: '',
@@ -94,6 +98,7 @@ export function UpdateBalanceDialog({
     const numBalance = parseFloat(state.newBalance.replace(/,/g, ''))
     if (!isNaN(numBalance)) {
       onAddEvent('balance', numBalance)
+      onUpdateBalance(numBalance)
       onOpenChange(false)
       setState({
         newBalance: '',

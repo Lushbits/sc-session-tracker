@@ -8,6 +8,7 @@ interface SessionDialogsProps {
   showEarningDialog: boolean
   showBalanceDialog: boolean
   onAddEvent: (type: Event['type'], amount: number, description?: string) => void
+  onUpdateBalance: (newBalance: number) => void
   onSpendDialogChange: (open: boolean) => void
   onEarningDialogChange: (open: boolean) => void
   onBalanceDialogChange: (open: boolean) => void
@@ -19,6 +20,7 @@ export function SessionDialogs({
   showEarningDialog,
   showBalanceDialog,
   onAddEvent,
+  onUpdateBalance,
   onSpendDialogChange,
   onEarningDialogChange,
   onBalanceDialogChange
@@ -40,6 +42,7 @@ export function SessionDialogs({
       <UpdateBalanceDialog
         currentBalance={currentBalance}
         onAddEvent={onAddEvent}
+        onUpdateBalance={onUpdateBalance}
         isOpen={showBalanceDialog}
         onOpenChange={onBalanceDialogChange}
       />
