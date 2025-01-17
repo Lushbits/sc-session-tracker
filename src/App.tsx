@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import { ThemeProvider } from './components/theme-provider'
 import { Button } from './components/ui/button'
-import { useTheme } from './components/theme-provider'
-import { Moon, Sun } from 'lucide-react'
 import SessionView from './components/SessionView'
 import SessionList from './components/SessionList'
 import StartSessionModal from './components/StartSessionModal'
@@ -25,6 +23,8 @@ import activeSessionImg from './assets/images/activesession.png'
 import historySessionImg from './assets/images/historysession.png'
 import updateBalanceImg from './assets/images/updatebalance.png'
 import newSessionImg from './assets/images/newsessiondialogue.png'
+import { FeedbackDialog } from './components/FeedbackDialog'
+import { versionHistory } from './components/Footer'
 
 export interface Session {
   id: string
@@ -43,31 +43,6 @@ export type Event = {
   description?: string
 }
 
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-
-  return (
-    <div className="flex gap-2">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setTheme("light")}
-        className={theme === "light" ? "bg-accent" : ""}
-      >
-        <Sun className="h-5 w-5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setTheme("dark")}
-        className={theme === "dark" ? "bg-accent" : ""}
-      >
-        <Moon className="h-5 w-5" />
-      </Button>
-    </div>
-  )
-}
-
 function App() {
   const { user, signOut } = useAuth()
   const { fetchSessions, createSession, updateSession, deleteSession, addEvent } = useDatabase()
@@ -80,6 +55,7 @@ function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
 
   useEffect(() => {
     // Update localStorage when activeSessionId changes
@@ -114,8 +90,8 @@ function App() {
   const handleStartSession = async (description: string, initialBalance: number) => {
     try {
       const sessionId = await createSession({
-        description,
-        startTime: new Date(),
+      description,
+      startTime: new Date(),
         initialBalance
       })
       await loadSessions()
@@ -216,33 +192,29 @@ function App() {
 
   if (!user) {
     return (
-      <ThemeProvider defaultTheme="dark" storageKey="sc-theme">
-        <div className="min-h-screen bg-background text-foreground flex flex-col bg-gradient-to-br from-background to-[hsl(202,34%,8%)]">
-          <header className="border-b border-border bg-background">
-            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-              <h1 className="text-2xl font-bold">SC Session Tracker</h1>
-              <ThemeToggle />
-            </div>
-          </header>
-
+      <ThemeProvider defaultTheme="dark">
+        <div className="min-h-screen landing-page flex flex-col">
           <main className="flex-1 flex flex-col items-center justify-start p-4 pt-12">
             <div className="w-full max-w-6xl space-y-16 mb-16">
-              {/* Hero Section + Login */}
+              {/* Hero Section */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 <div className="space-y-6">
-                  <h2 className="text-4xl font-bold tracking-tight">
-                  Maximize Your Star Citizen Gaming Sessions
-                  </h2>
+                  <h1 className="text-4xl font-bold">
+                    <span>SC Session Tracker</span>
+                  </h1>
                   <p className="text-xl text-muted-foreground">
-                  Log your earnings, spending, and profits to achieve peak efficiency and build your wealth among the stars.
+                  Maximize Your Star Citizen gaming sessions. Log your earnings, spending, and profits to achieve peak efficiency and build your wealth among the stars.
                   </p>
                   <p className="text-muted-foreground text-sm">
-                  This is a free fan-made webapp for the game <a
-            href="https://play.sc"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >Star Citizen</a>
+                    This is a free fan-made webapp for the game{' '}
+                    <a
+                      href="https://play.sc"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Star Citizen
+                    </a>
                   </p>
                 </div>
                 <div className="flex flex-col items-center justify-center space-y-4">
@@ -268,7 +240,7 @@ function App() {
                 </div>
               </div>
 
-              {/* Secondary Features */}
+              {/* Features Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Session History */}
                 <div className="space-y-4">
@@ -311,7 +283,6 @@ function App() {
               </div>
             </div>
           </main>
-
           <Footer />
         </div>
       </ThemeProvider>
@@ -319,13 +290,18 @@ function App() {
   }
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="sc-theme">
-      <div className="min-h-screen text-foreground flex flex-col">
-        <header className="border-b border-border bg-background">
+    <ThemeProvider defaultTheme="dark">
+      <div className="min-h-screen landing-page flex flex-col">
+        <header className="border-b border-border backdrop-blur-sm">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-bold">SC Session Tracker</h1>
             <div className="flex items-center gap-4">
-              <ThemeToggle />
+              <Button 
+                variant="default" 
+                onClick={() => setIsFeedbackOpen(true)}
+              >
+                Give Feedback
+              </Button>
               {user.user_metadata?.avatar_url && (
                 <img 
                   src={user.user_metadata.avatar_url} 
@@ -404,6 +380,12 @@ function App() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <FeedbackDialog 
+          isOpen={isFeedbackOpen} 
+          onOpenChange={setIsFeedbackOpen}
+          version={versionHistory[0].version}
+        />
       </div>
     </ThemeProvider>
   )

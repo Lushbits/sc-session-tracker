@@ -6,171 +6,134 @@
 
 @layer base {
   :root {
-    --font-sans: 'Space Grotesk', system-ui, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-
-    /* Light theme - default */
-    --background: 220 14% 96%;
-    --foreground: 220 25% 10%;
-    
-    --card: 220 14% 98%;
-    --card-foreground: 220 25% 10%;
-    
-    --popover: 220 14% 98%;
-    --popover-foreground: 220 25% 10%;
-    
-    --primary: 198 46% 47%;
-    --primary-foreground: 220 14% 98%;
-    
-    --secondary: 204 88% 53%;
-    --secondary-foreground: 220 14% 98%;
-    
-    --muted: 220 14% 92%;
-    --muted-foreground: 220 25% 40%;
-    
-    --accent: 198 46% 47%;
-    --accent-foreground: 220 14% 98%;
-    
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 220 14% 98%;
-    
-    --border: 220 13% 85%;
-    --input: 220 13% 85%;
-    --ring: 198 46% 47%;
-    
-    --radius: 0.5rem;
-
-    /* Custom event colors for light theme */
-    --event-starting-balance: 220 25% 40%;
-    --event-earning: 142 76% 36%;
-    --event-spending: 0 84% 60%;
-    --event-balance-adjust: 199 89% 48%;
-  }
+    /* Base colors */
+    --background: 228 19% 8%;
+    --foreground: 210 40% 98%;
  
-  .dark {
-    --background: 240 17% 5%;
-    --foreground: 0 0% 90%;
+    --card: 207 27% 12%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    /* Primary colors and variants */
+    --whitecolor: 210 40% 98%;
+    --primary: 212 85% 69%;
+    --primary-foreground: 222.2 47.4% 11.2%;
     
-    --card: 240 17% 5%;
-    --card-foreground: 0 0% 90%;
-    
-    --popover: 240 17% 5%;
-    --popover-foreground: 0 0% 90%;
-    
-    --primary: 198 46% 47%;
-    --primary-foreground: 240 17% 5%;
-    
-    --secondary: 204 88% 53%;
-    --secondary-foreground: 240 17% 5%;
-    
-    --muted: 240 10% 10%;
-    --muted-foreground: 240 5% 65%;
-    
-    --accent: 198 46% 47%;
-    --accent-foreground: 240 17% 5%;
-    
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 90%;
-    
-    --border: 240 5% 10%;
-    --input: 240 5% 10%;
-    --ring: 198 46% 47%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    /* Utility colors */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: var(--primary);
+    --ring: var(--primary);
 
-    /* Custom event colors for dark theme */
+    /* Event type colors */
     --event-starting-balance: 0 0% 100%;
     --event-earning: 142 69% 50%;
     --event-spending: 7 62% 49%;
-    --event-balance-adjust: 202 34% 50%;
+    --event-balance-adjust: var(--primary);
 
-    /* Custom gradient background */
-    --gradient-start: 240 17% 5%;
-    --gradient-end: 202 34% 10%;
+    /* Icon hover effects */
+    --icon-hover-color: var(--whitecolor);
+    --icon-hover-scale: 1.1;
+    --icon-hover-transition: 0.1s ease-in-out;
+
+    /* Gradient colors */
+    --gradient-start: var(--background); 
+    --gradient-end: var(--card); 
+    
+    /*--gradient-start: 240 17% 5%;
+    --gradient-end: 202 34% 8%;
 
     /* Header and footer backgrounds */
-    --header-bg: 240 17% 5%;
-    --footer-bg: 240 17% 5%;
+    --header-bg: var(--gradient-start);
+    --footer-bg: var(--gradient-start);
+    
+    --radius: 0.5rem;
   }
 }
 
+/* Base styles */
 @layer base {
   * {
     @apply border-border;
   }
   
-  /* Root gradient background */
-  :root {
-    min-height: 100vh;
-  }
-
-  .dark {
-    background: linear-gradient(135deg, 
-      hsl(var(--gradient-start)) 0%,
-      hsl(var(--gradient-end)) 100%
-    ) fixed;
-  }
-
   body {
-    @apply text-foreground;
+    @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: var(--font-sans);
-    min-height: 100vh;
-    margin: 0;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
   }
 
-  .font-mono {
-    font-family: var(--font-mono);
-  }
-
-  /* Header and footer styles */
-  header {
-    background-color: hsl(var(--header-bg));
-    position: relative;
-    z-index: 10;
-  }
-
-  footer {
-    background-color: hsl(var(--footer-bg));
-    position: relative;
-    z-index: 10;
+  /* Landing page gradient background */
+  .landing-page {
+    @apply min-h-screen;
+    background: linear-gradient(135deg, hsl(var(--gradient-start)) 0%, hsl(var(--gradient-end)) 100%);
   }
 }
 
-/* Custom hover effects for interactive elements */
+/* Font styles */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Component backgrounds */
+header {
+  background-color: hsl(var(--header-bg));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+footer {
+  background-color: hsl(var(--footer-bg));
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Interactive element styles */
 .hover-glow {
   transition: all 0.2s ease-in-out;
 }
 
 .hover-glow:hover {
-  filter: brightness(1.2);
-  box-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+  box-shadow: 0 0 15px hsla(var(--ring) / 0.2);
+  border-color: hsl(var(--ring));
 }
 
-/* Custom input styling */
+/* Input styles */
 .input-glow {
-  transition: border-color 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .input-glow:focus {
-  border-color: hsl(var(--primary));
-  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.1);
+  box-shadow: 0 0 15px hsla(var(--ring) / 0.2);
+  border-color: hsl(var(--ring));
 }
 
-/* Custom button styling */
+/* Button styles */
 .button-glow {
   transition: all 0.2s ease-in-out;
 }
 
 .button-glow:hover:not(:disabled) {
-  filter: brightness(1.1);
-  box-shadow: 0 0 15px hsl(var(--primary) / 0.3);
-  transform: translateY(-1px);
+  box-shadow: 0 0 15px hsla(var(--ring) / 0.2);
+  border-color: hsl(var(--ring));
 }
 
 .button-glow:active:not(:disabled) {
-  transform: translateY(0);
+  transform: translateY(1px);
 }
 
-/* Event type specific styling */
+/* Event type colors */
 .event-starting-balance {
   color: hsl(var(--event-starting-balance));
 }
@@ -187,49 +150,94 @@
   color: hsl(var(--event-balance-adjust));
 }
 
-/* Category button styling */
+/* Category button styles */
 .category-button-earning {
-  background-color: hsl(var(--event-earning)) !important;
-  color: white !important;
-  font-weight: 500 !important;
-  transition: all 0.2s ease-in-out !important;
-  box-shadow: 0 0 0 1px hsl(var(--event-earning) / 0.2),
-              0 0 0 0 hsl(var(--event-earning) / 0.2) !important;
+  background-color: hsl(var(--event-earning) / 0.1) !important;
+  color: hsl(var(--event-earning)) !important;
+  border: 1px solid hsl(var(--event-earning) / 0.2) !important;
+  transition: all 0.2s ease-in-out;
 }
 
 .category-button-earning:hover {
-  background-color: hsl(var(--event-earning) / 0.8) !important;
-  box-shadow: 0 0 0 1px hsl(var(--event-earning) / 0.2),
-              0 0 20px 0 hsl(var(--event-earning) / 0.3) !important;
+  background-color: hsl(var(--event-earning) / 0.2) !important;
+  border-color: hsl(var(--event-earning) / 0.3) !important;
+  box-shadow: 0 0 15px hsla(var(--event-earning) / 0.2);
 }
 
 .category-button-spending {
-  background-color: hsl(var(--event-spending)) !important;
-  color: white !important;
-  font-weight: 500 !important;
-  transition: all 0.2s ease-in-out !important;
-  box-shadow: 0 0 0 1px hsl(var(--event-spending) / 0.2),
-              0 0 0 0 hsl(var(--event-spending) / 0.2) !important;
+  background-color: hsl(var(--event-spending) / 0.1) !important;
+  color: hsl(var(--event-spending)) !important;
+  border: 1px solid hsl(var(--event-spending) / 0.2) !important;
+  transition: all 0.2s ease-in-out;
 }
 
 .category-button-spending:hover {
-  background-color: hsl(var(--event-spending) / 0.8) !important;
-  box-shadow: 0 0 0 1px hsl(var(--event-spending) / 0.2),
-              0 0 20px 0 hsl(var(--event-spending) / 0.3) !important;
+  background-color: hsl(var(--event-spending) / 0.2) !important;
+  border-color: hsl(var(--event-spending) / 0.3) !important;
+  box-shadow: 0 0 15px hsla(var(--event-spending) / 0.2);
 }
 
-/* Balance adjust button styling */
 .balance-adjust-button {
-  background-color: hsl(var(--event-balance-adjust)) !important;
-  color: white !important;
-  font-weight: 500 !important;
-  transition: all 0.2s ease-in-out !important;
-  box-shadow: 0 0 0 1px hsl(var(--event-balance-adjust) / 0.2),
-              0 0 0 0 hsl(var(--event-balance-adjust) / 0.2) !important;
+  background-color: hsl(var(--event-balance-adjust) / 0.1) !important;
+  color: hsl(var(--event-balance-adjust)) !important;
+  border: 1px solid hsl(var(--event-balance-adjust) / 0.2) !important;
+  transition: all 0.2s ease-in-out;
 }
 
 .balance-adjust-button:hover {
-  background-color: hsl(var(--event-balance-adjust) / 0.8) !important;
-  box-shadow: 0 0 0 1px hsl(var(--event-balance-adjust) / 0.2),
-              0 0 20px 0 hsl(var(--event-balance-adjust) / 0.3) !important;
+  background-color: hsl(var(--event-balance-adjust) / 0.2) !important;
+  border-color: hsl(var(--event-balance-adjust) / 0.3) !important;
+  box-shadow: 0 0 15px hsla(var(--event-balance-adjust) / 0.2);
+}
+
+/* Update balance icon hover effect */
+.update-balance-icon {
+  transition: all var(--icon-hover-transition);
+}
+
+.update-balance-icon:hover {
+  background-color: hsl(var(--background));
+  transform: scale(var(--icon-hover-scale));
+}
+
+.update-balance-icon:hover svg {
+  color: hsl(var(--icon-hover-color));
+}
+
+/* Input field styling */
+input {
+  border-color: hsl(var(--input)) !important;
+  border-width: 1px !important;
+}
+
+input:focus {
+  border-color: hsl(var(--input)) !important;
+  box-shadow: 0 0 0 1px hsl(var(--input) / 0.3) !important;
+}
+
+/* Session history list button styles */
+.session-view-button {
+  transition: all var(--icon-hover-transition);
+}
+
+.session-view-button:hover {
+  background-color: hsl(var(--primary) / 0.1);
+  transform: scale(var(--icon-hover-scale));
+}
+
+.session-view-button:hover svg {
+  color: hsl(var(--primary));
+}
+
+.session-delete-button {
+  transition: all var(--icon-hover-transition);
+}
+
+.session-delete-button:hover {
+  background-color: hsl(var(--destructive) / 0.1);
+  transform: scale(var(--icon-hover-scale));
+}
+
+.session-delete-button:hover svg {
+  color: hsl(var(--destructive));
 }

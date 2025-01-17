@@ -40,10 +40,9 @@ export function SessionStats({
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <Button
-                  variant="ghost"
                   size="icon"
                   onClick={onUpdateBalance}
-                  className="h-8 w-8"
+                  className="h-8 w-8 update-balance-icon"
                 >
                   <RotateCcw className="h-4 w-4" />
                 </Button>

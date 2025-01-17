@@ -1,13 +1,23 @@
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 
-interface VersionHistoryEntry {
+export interface VersionHistoryEntry {
   version: string
   date: string
   changes: string[]
 }
 
-const versionHistory: VersionHistoryEntry[] = [
+export const versionHistory: VersionHistoryEntry[] = [
+  {
+    version: '0.2.5',
+    date: '2025-01-17',
+    changes: [
+      'Added feedback form with email integration',
+      'Enhanced button hover effects and animations',
+      'Improved UI consistency across the app',
+      'Updated dialog box and chart background colors'
+    ]
+  },
   {
     version: '0.2.0',
     date: '2025-01-16',
@@ -26,8 +36,7 @@ const versionHistory: VersionHistoryEntry[] = [
     changes: [
       'Initial beta release',
       'Basic session tracking functionality',
-      'Discord authentication',
-      'Dark/light theme support'
+      'Discord authentication'
     ]
   }
 ]

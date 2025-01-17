@@ -122,6 +122,7 @@ export default function SessionList({ sessions, onDeleteSession, onViewSessionDe
                     variant="ghost"
                     size="icon"
                     onClick={() => onViewSessionDetails(session)}
+                    className="session-view-button"
                   >
                     <SearchIcon className="h-4 w-4" />
                   </Button>
@@ -129,7 +130,7 @@ export default function SessionList({ sessions, onDeleteSession, onViewSessionDe
                     variant="ghost"
                     size="icon"
                     onClick={() => onDeleteSession(session.id)}
-                    className="text-destructive hover:text-destructive"
+                    className="session-delete-button"
                   >
                     <Trash2Icon className="h-4 w-4" />
                   </Button>
