@@ -217,7 +217,7 @@ function App() {
   if (!user) {
     return (
       <ThemeProvider defaultTheme="dark" storageKey="sc-theme">
-        <div className="min-h-screen bg-background text-foreground flex flex-col dark:bg-gradient-to-b dark:from-background dark:to-[hsl(202,34%,8%)]">
+        <div className="min-h-screen bg-background text-foreground flex flex-col bg-gradient-to-br from-background to-[hsl(202,34%,8%)]">
           <header className="border-b border-border bg-background">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
               <h1 className="text-2xl font-bold">SC Session Tracker</h1>
