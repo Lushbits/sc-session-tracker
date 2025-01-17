@@ -9,8 +9,20 @@ interface VersionHistoryEntry {
 
 const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.2.0',
+    date: '2025-01-16',
+    changes: [
+      'Improved landing page with feature showcase and screenshots',
+      'Added session logs feature for tracking session details',
+      'Simplified authentication to Discord-only login',
+      'Enhanced UI with gradient backgrounds and improved spacing',
+      'Added automatic balance carry-forward from previous sessions',
+      'Fixed double event creation in balance updates'
+    ]
+  },
+  {
     version: '0.1.0',
-    date: '2024-03-20',
+    date: '2025-01-15',
     changes: [
       'Initial beta release',
       'Basic session tracking functionality',
@@ -28,7 +40,7 @@ export function Footer() {
     <footer className="mt-auto py-6 border-t border-border">
       <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
         <div>
-          Site made by{' '}
+          Webapp made by{' '}
           <a
             href="https://x.com/Lushbits"
             target="_blank"
@@ -40,7 +52,7 @@ export function Footer() {
         </div>
         
         <div className="text-center">
-          Support the project by sending aUEC ingame to{' '}
+        Feedback very welcome! It's a beta app and I'm happy to add more features, fix bugs, and improve the experience for you. Feel free to support the project by either sending some sweet, sweet aUEC ingame to{' '}
           <a
             href="https://robertsspaceindustries.com/citizens/Lushbits"
             target="_blank"
@@ -49,8 +61,7 @@ export function Footer() {
           >
             Lushbits
           </a>
-          ,<br />
-          or use{' '}
+          , or use{' '}
           <a
             href="https://robertsspaceindustries.com/enlist?referral=STAR-DSYX-6QYY"
             target="_blank"

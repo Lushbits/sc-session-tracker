@@ -213,13 +213,101 @@ function App() {
   if (!user) {
     return (
       <ThemeProvider defaultTheme="dark" storageKey="sc-theme">
-        <div className="min-h-screen bg-background text-foreground flex flex-col">
-          <div className="flex-1 flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-sm space-y-6">
-              <h1 className="text-2xl font-bold text-center">SC Session Tracker</h1>
-              <LoginForm />
+        <div className="min-h-screen bg-background text-foreground flex flex-col dark:bg-gradient-to-b dark:from-background dark:to-[hsl(202,34%,8%)]">
+          <header className="border-b border-border bg-background">
+            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+              <h1 className="text-2xl font-bold">SC Session Tracker</h1>
+              <ThemeToggle />
             </div>
-          </div>
+          </header>
+
+          <main className="flex-1 flex flex-col items-center justify-start p-4 pt-12">
+            <div className="w-full max-w-6xl space-y-16 mb-16">
+              {/* Hero Section + Login */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div className="space-y-6">
+                  <h2 className="text-4xl font-bold tracking-tight">
+                  Maximize Your Star Citizen Gaming Sessions
+                  </h2>
+                  <p className="text-xl text-muted-foreground">
+                  Log your earnings, spending, and profits to achieve peak efficiency and build your wealth among the stars.
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                  This is a free fan-made webapp for the game <a
+            href="https://play.sc"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >Star Citizen</a>
+                  </p>
+                </div>
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <p className="text-lg text-muted-foreground mb-2">Ready to get started?</p>
+                  <div className="w-full max-w-md">
+                    <LoginForm />
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Feature */}
+              <div className="space-y-6">
+                <img 
+                  src="/src/assets/images/activesession.png" 
+                  alt="Active session tracking" 
+                  className="w-full rounded-lg border border-border shadow-lg"
+                />
+                <div className="text-center max-w-2xl mx-auto">
+                  <h3 className="text-xl font-semibold mb-2">Real-time Session Tracking</h3>
+                  <p className="text-muted-foreground">
+                    Monitor your earnings and expenses in real-time with an intuitive interface. Track your profit per hour and visualize your progress with dynamic charts.
+                  </p>
+                </div>
+              </div>
+
+              {/* Secondary Features */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Session History */}
+                <div className="space-y-4">
+                  <img 
+                    src="/src/assets/images/historysession.png" 
+                    alt="Session history view" 
+                    className="w-full rounded-lg border border-border shadow-lg"
+                  />
+                  <h3 className="text-lg font-semibold">Detailed Session History</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Review past sessions with comprehensive statistics and insights. Analyze your performance and identify your most profitable activities.
+                  </p>
+                </div>
+
+                {/* Balance Updates */}
+                <div className="space-y-4">
+                  <img 
+                    src="/src/assets/images/updatebalance.png" 
+                    alt="Balance update interface" 
+                    className="w-full rounded-lg border border-border shadow-lg"
+                  />
+                  <h3 className="text-lg font-semibold">Quick Balance Updates</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Easily record earnings and expenses with a streamlined interface. Categorize your transactions for better tracking and analysis.
+                  </p>
+                </div>
+
+                {/* New Session */}
+                <div className="space-y-4">
+                  <img 
+                    src="/src/assets/images/newsessiondialogue.png" 
+                    alt="New session creation" 
+                    className="w-full rounded-lg border border-border shadow-lg"
+                  />
+                  <h3 className="text-lg font-semibold">Seamless Session Management</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Start new sessions with ease. Your previous balance is automatically carried forward, making it simple to maintain accurate records across sessions.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </main>
+
           <Footer />
         </div>
       </ThemeProvider>
