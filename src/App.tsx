@@ -21,6 +21,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./components/ui/alert-dialog"
+import activeSessionImg from './assets/images/activesession.png'
+import historySessionImg from './assets/images/historysession.png'
+import updateBalanceImg from './assets/images/updatebalance.png'
+import newSessionImg from './assets/images/newsessiondialogue.png'
 
 export interface Session {
   id: string
@@ -252,7 +256,7 @@ function App() {
               {/* Main Feature */}
               <div className="space-y-6">
                 <img 
-                  src="/src/assets/images/activesession.png" 
+                  src={activeSessionImg}
                   alt="Active session tracking" 
                   className="w-full rounded-lg border border-border shadow-lg"
                 />
@@ -269,7 +273,7 @@ function App() {
                 {/* Session History */}
                 <div className="space-y-4">
                   <img 
-                    src="/src/assets/images/historysession.png" 
+                    src={historySessionImg}
                     alt="Session history view" 
                     className="w-full rounded-lg border border-border shadow-lg"
                   />
@@ -282,7 +286,7 @@ function App() {
                 {/* Balance Updates */}
                 <div className="space-y-4">
                   <img 
-                    src="/src/assets/images/updatebalance.png" 
+                    src={updateBalanceImg}
                     alt="Balance update interface" 
                     className="w-full rounded-lg border border-border shadow-lg"
                   />
@@ -295,7 +299,7 @@ function App() {
                 {/* New Session */}
                 <div className="space-y-4">
                   <img 
-                    src="/src/assets/images/newsessiondialogue.png" 
+                    src={newSessionImg}
                     alt="New session creation" 
                     className="w-full rounded-lg border border-border shadow-lg"
                   />
