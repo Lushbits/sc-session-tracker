@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog'
 import { Button } from './ui/button'
-import { Event } from '../App'
+import { SessionEvent } from '../types'
 import { BalanceInput } from './balance/BalanceInput'
 import { CategoryButtons } from './balance/CategoryButtons'
 import { CustomInputSection } from './balance/CustomInputSection'
@@ -13,7 +13,7 @@ interface UpdateBalanceDialogProps {
   currentBalance: number
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onAddEvent: (type: Event['type'], amount: number, description?: string) => void
+  onAddEvent: (type: SessionEvent['type'], amount: number, description?: string) => void
   onUpdateBalance: (newBalance: number) => void
 }
 

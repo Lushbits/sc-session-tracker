@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Session } from '../App'
+import { Session } from '../types'
 
 export interface ChartDataPoint {
   timestamp: Date

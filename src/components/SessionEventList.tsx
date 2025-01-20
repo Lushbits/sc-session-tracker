@@ -1,9 +1,9 @@
-import { Event } from '../App'
-import { SessionEvent } from './SessionEvent'
+import { SessionEvent } from '../types'
+import { SessionEvent as SessionEventComponent } from './SessionEvent'
 import { useState } from 'react'
 
 interface SessionEventListProps {
-  events: Event[]
+  events: SessionEvent[]
   startTime: Date
   initialBalance: number
   hoveredEventTime: string | null
@@ -14,7 +14,7 @@ export function SessionEventList({ events, startTime, initialBalance, hoveredEve
   const [localHoveredEventTime, setLocalHoveredEventTime] = useState<string | null>(null)
 
   // Create initial balance event
-  const initialEvent: Event = {
+  const initialEvent: SessionEvent = {
     timestamp: startTime,
     type: 'session_start',
     amount: initialBalance,
@@ -27,7 +27,7 @@ export function SessionEventList({ events, startTime, initialBalance, hoveredEve
   )
 
   // Calculate running balance for each event according to the prompt specifications
-  const getBalancesForEvent = (events: Event[], targetIndex: number): { prevBalance: number, currentBalance: number } => {
+  const getBalancesForEvent = (events: SessionEvent[], targetIndex: number): { prevBalance: number, currentBalance: number } => {
     let balance = initialBalance
     
     // Calculate balance before the event
@@ -66,7 +66,7 @@ export function SessionEventList({ events, startTime, initialBalance, hoveredEve
         const eventIndex = sortedEvents.length - 1 - index
         const { prevBalance, currentBalance } = getBalancesForEvent(sortedEvents, eventIndex)
         return (
-          <SessionEvent
+          <SessionEventComponent
             key={`${event.timestamp.getTime()}-${index}`}
             event={event}
             prevBalance={prevBalance}

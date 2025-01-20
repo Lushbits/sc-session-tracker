@@ -1,13 +1,13 @@
 import { AddEventDialog } from './AddEventDialog'
 import { UpdateBalanceDialog } from './UpdateBalanceDialog'
-import { Event } from '../App'
+import { SessionEvent } from '../types'
 
 interface SessionDialogsProps {
   currentBalance: number
   showSpendDialog: boolean
   showEarningDialog: boolean
   showBalanceDialog: boolean
-  onAddEvent: (type: Event['type'], amount: number, description?: string) => void
+  onAddEvent: (type: SessionEvent['type'], amount: number, description?: string) => void
   onUpdateBalance: (newBalance: number) => void
   onSpendDialogChange: (open: boolean) => void
   onEarningDialogChange: (open: boolean) => void
