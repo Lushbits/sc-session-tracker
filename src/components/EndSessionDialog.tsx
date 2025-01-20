@@ -36,7 +36,7 @@ export function EndSessionDialog({
 
   const handleEndSession = async () => {
     const numBalance = numberUtils.parseDisplayNumber(finalBalance)
-    if (numBalance > 0) {
+    if (numBalance >= 0) {
       try {
         setError(null)
         // Create a balance event for the final balance
@@ -114,7 +114,7 @@ export function EndSessionDialog({
           <Button 
             variant="destructive"
             onClick={handleEndSession}
-            disabled={!finalBalance}
+            disabled={numberUtils.parseDisplayNumber(finalBalance) < 0}
           >
             End Session
           </Button>
