@@ -8,6 +8,13 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.3.3',
+    date: '2025-01-20',
+    changes: [
+      'Bugfix: Make sure we properly account for balance events in the total earnings and spending calculations.',
+    ]
+  },
+  {
     version: '0.3.2',
     date: '2025-01-20',
     changes: [
