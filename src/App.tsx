@@ -150,7 +150,7 @@ function App() {
       new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     )
     
-    return sortedEvents[sortedEvents.length - 1]?.amount || lastSession.initialBalance
+    return sortedEvents[sortedEvents.length - 1]?.amount ?? lastSession.initialBalance
   }
 
   if (!user) {

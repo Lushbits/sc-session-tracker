@@ -12,7 +12,8 @@ export const versionHistory: VersionHistoryEntry[] = [
     date: '2025-01-20',
     changes: [
       'Bugfix: Make sure we properly account for balance events in the total earnings and spending calculations.',
-    ]
+      'Bugfix: Make sure a new session starts with 0 if the last session ended 0 (use nullish coalescing operator instead of logical OR)'
+  ]
   },
   {
     version: '0.3.2',
