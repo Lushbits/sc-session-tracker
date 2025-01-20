@@ -12,7 +12,7 @@ export function ProfitDisplay({ profitPerHour }: ProfitDisplayProps) {
     <div className="mt-2">
       <div className={styles.label}>Profit/hr</div>
       <div className={valueClass}>
-        {isPositive ? '+' : ''}{profitPerHour.toLocaleString()} aUEC
+        {isPositive ? '+' : ''}{Math.floor(profitPerHour).toLocaleString()} aUEC
       </div>
     </div>
   )

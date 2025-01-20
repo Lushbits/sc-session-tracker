@@ -26,7 +26,7 @@ export function SessionHeader({
   onPause,
   onResume,
   onEndSession,
-  onUpdateDescription
+  onUpdateDescription,
 }: SessionHeaderProps) {
   // State for inline title editing
   const [isEditingTitle, setIsEditingTitle] = useState(false)

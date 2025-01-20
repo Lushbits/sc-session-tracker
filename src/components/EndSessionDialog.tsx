@@ -3,14 +3,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-import { Event } from '../App'
+import { SessionEvent } from '../types'
 
 interface EndSessionDialogProps {
   currentBalance: number
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   onEndSession: (sessionLog?: string) => void
-  onAddEvent: (type: Event['type'], amount: number, description?: string) => void
+  onAddEvent: (type: SessionEvent['type'], amount: number, description?: string) => void
 }
 
 export function EndSessionDialog({
@@ -47,7 +47,7 @@ export function EndSessionDialog({
         setError(null)
         // Create a balance event for the final balance
         await onAddEvent('balance', numBalance)
-        await onEndSession(sessionLog === '' ? undefined : sessionLog)
+        await onEndSession(sessionLog)
         onOpenChange(false)
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to end session')

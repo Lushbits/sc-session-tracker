@@ -1,20 +1,24 @@
 import { useState, useCallback } from 'react'
-import { Session } from '../App'
+import { Session } from '../types'
 import { SessionHeader } from './SessionHeader'
-import { SessionStats } from './SessionStats'
 import { SessionChart } from './SessionChart'
 import { SessionEventList } from './SessionEventList'
 import { SessionDialogs } from './SessionDialogs'
+import { CaptainLogs } from './CaptainLogs'
 import { useTimer } from '../hooks/useTimer'
 import { EndSessionDialog } from './EndSessionDialog'
 import { useSessionEvents } from '../hooks/useSessionEvents'
 import { useSessionStats } from '../hooks/useSessionStats'
 import { useChartData } from '../hooks/useChartData'
-import { formatShortTime } from '../utils/timeFormatting'
+import { formatElapsedTime } from '../utils/timeFormatting'
+import { formatNumber } from '../utils/numberFormatting'
+import { RefreshCcw, ScrollText } from "lucide-react"
+import { Button } from './ui/button'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet'
 
 interface SessionViewProps {
   session: Session
-  onEndSession: () => void
+  onEndSession: (sessionId: string, sessionLog?: string) => void
   onUpdateSession: (session: Session) => void
 }
 
@@ -38,6 +42,7 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
   const [showEarningDialog, setShowEarningDialog] = useState(false)
   const [showBalanceDialog, setShowBalanceDialog] = useState(false)
   const [showEndSessionDialog, setShowEndSessionDialog] = useState(false)
+  const [showCaptainLogs, setShowCaptainLogs] = useState(false)
 
   // Memoized handlers
   const handleUpdateDescription = useCallback((description: string) => {
@@ -46,6 +51,14 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
 
   const handleEndSession = useCallback(() => {
     setShowEndSessionDialog(true)
+  }, [])
+
+  const handleEndSessionConfirm = useCallback((sessionLog?: string) => {
+    onEndSession(session.id, sessionLog)
+  }, [session.id, onEndSession])
+
+  const handleBalanceUpdate = useCallback(() => {
+    setShowBalanceDialog(true)
   }, [])
 
   return (
@@ -61,27 +74,88 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
           onUpdateDescription={handleUpdateDescription}
         />
 
-        <SessionStats
-          currentBalance={currentBalance}
-          stats={stats}
-          onUpdateBalance={() => setShowBalanceDialog(true)}
-        />
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-4xl font-medium tracking-tight">{formatNumber(currentBalance)} aUEC</span>
+                <Button
+                  size="sm"
+                  className="h-8 px-2 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:border-primary/30 hover:shadow-[0_0_15px_hsla(var(--primary)/0.2)] transition-all"
+                  onClick={handleBalanceUpdate}
+                >
+                  <RefreshCcw className="h-4 w-4 mr-2" />
+                  Update Balance
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-8 px-2 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:border-primary/30 hover:shadow-[0_0_15px_hsla(var(--primary)/0.2)] transition-all"
+                  onClick={() => setShowCaptainLogs(true)}
+                >
+                  <ScrollText className="h-4 w-4 mr-2" />
+                  Captain's Log
+                </Button>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-4">
+                <div className="text-right">
+                  <div className="text-sm text-muted-foreground">Total Earnings</div>
+                  <div className="font-medium" style={{ color: "hsl(var(--event-earning))" }}>
+                    {formatNumber(stats.totalEarnings)} aUEC
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-muted-foreground">Total Spend</div>
+                  <div className="font-medium" style={{ color: "hsl(var(--event-spending))" }}>
+                    {formatNumber(stats.totalSpend)} aUEC
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-muted-foreground">Session Profit</div>
+                  <div 
+                    className="font-medium"
+                    style={{ 
+                      color: `hsl(var(${stats.sessionProfit >= 0 ? '--event-earning' : '--event-spending'}))`
+                    }}
+                  >
+                    {formatNumber(stats.sessionProfit)} aUEC
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <SessionChart
-          chartData={chartData}
-          hoveredEventTime={hoveredEventTime}
-          onHover={setHoveredEventTime}
-          formatTime={(timestamp) => formatShortTime(timestamp, session.startTime)}
-          profitPerHour={stats.profitPerHour}
-        />
+          <SessionChart
+            chartData={chartData}
+            hoveredEventTime={hoveredEventTime}
+            onHover={setHoveredEventTime}
+            formatTime={(timestamp) => formatElapsedTime(timestamp, session.startTime)}
+            profitPerHour={stats.profitPerHour}
+          />
 
-        <SessionEventList
-          events={session.events}
-          startTime={session.startTime}
-          initialBalance={session.initialBalance}
-          hoveredEventTime={hoveredEventTime}
-          onHover={setHoveredEventTime}
-        />
+          <SessionEventList
+            events={session.events}
+            startTime={session.startTime}
+            initialBalance={session.initialBalance}
+            hoveredEventTime={hoveredEventTime}
+            onHover={setHoveredEventTime}
+          />
+
+          <Sheet open={showCaptainLogs} onOpenChange={setShowCaptainLogs}>
+            <SheetContent side="right" className="w-[600px] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Captain's Log</SheetTitle>
+                <SheetDescription>
+                  Record your thoughts and experiences during this session.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6">
+                <CaptainLogs sessionId={session.id} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
 
         <SessionDialogs
           currentBalance={currentBalance}
@@ -99,7 +173,7 @@ export default function SessionView({ session, onEndSession, onUpdateSession }: 
           currentBalance={currentBalance}
           isOpen={showEndSessionDialog}
           onOpenChange={setShowEndSessionDialog}
-          onEndSession={onEndSession}
+          onEndSession={handleEndSessionConfirm}
           onAddEvent={handleAddEvent}
         />
       </div>

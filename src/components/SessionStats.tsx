@@ -42,7 +42,7 @@ export function SessionStats({
                 <Button
                   size="icon"
                   onClick={onUpdateBalance}
-                  className="h-8 w-8 update-balance-icon"
+                  className="h-8 w-8 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:border-primary/30 hover:shadow-[0_0_15px_hsla(var(--primary)/0.2)] transition-all"
                 >
                   <RotateCcw className="h-4 w-4" />
                 </Button>

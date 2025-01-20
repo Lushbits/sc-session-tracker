@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
-import { Textarea } from './ui/textarea'
+import { Textarea } from '@/components/ui/textarea'
 import { Heart } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 

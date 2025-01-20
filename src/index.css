@@ -20,6 +20,7 @@
     --whitecolor: 210 40% 98%;
     --primary: 212 85% 69%;
     --primary-foreground: 222.2 47.4% 11.2%;
+    --primary-rgb: 103, 182, 255;  /* RGB values for primary color */
     
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -38,6 +39,10 @@
     --input: var(--primary);
     --ring: var(--primary);
 
+    /* Card fade colors */
+    --card-fade-from: hsl(var(--card));
+    --card-fade-from-hover: hsl(var(--accent) / 0.05);
+
     /* Event type colors */
     --event-starting-balance: 0 0% 100%;
     --event-earning: 142 69% 50%;
@@ -50,10 +55,7 @@
     --icon-hover-transition: 0.1s ease-in-out;
 
     /* Gradient colors */
-    --gradient-start: var(--background); 
-    --gradient-end: var(--card); 
-    
-    /*--gradient-start: 240 17% 5%;
+    --gradient-start: 240 17% 5%;
     --gradient-end: 202 34% 8%;
 
     /* Header and footer backgrounds */
@@ -61,6 +63,9 @@
     --footer-bg: var(--gradient-start);
     
     --radius: 0.5rem;
+
+    /* Controls the height of the text fade gradient in cards */
+    --card-fade-height: 3rem;
   }
 }
 

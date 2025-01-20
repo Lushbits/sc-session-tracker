@@ -9,6 +9,20 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.3.0',
+    date: '2025-01-20',
+    changes: [
+      'Added Captain\'s Log feature for documenting session experiences with image support',
+      'Redesigned landing page with feature showcase and interactive image previews',
+      'Added Community Logs section (coming soon)',
+      'Improved session details view with better scrolling and animations',
+      'Enhanced date and time display across the application',
+      'Added visual feedback for interactive elements',
+      'Improved UI consistency and animations throughout the app',
+      'Fixed various bugs and improved performance'
+    ]
+  },
+  {
     version: '0.2.5',
     date: '2025-01-17',
     changes: [

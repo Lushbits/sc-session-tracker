@@ -1,55 +1,33 @@
-import { useMemo } from 'react'
-import { Session } from '../App'
+import { Session } from '../types'
 
 interface SessionStats {
   totalEarnings: number
   totalSpend: number
   sessionProfit: number
   profitPerHour: number
+  duration: number
 }
 
-export function useSessionStats(
-  session: Session,
-  elapsedTime: number
-): SessionStats {
-  return useMemo(() => {
-    let totalEarnings = 0
-    let totalSpend = 0
-    let lastBalance = session.initialBalance
+export function useSessionStats(session: Session, duration: number): SessionStats {
+  const totalEarnings = session.events
+    .filter(event => event.type === 'earning')
+    .reduce((sum, event) => sum + event.amount, 0)
 
-    // Sort events chronologically
-    const sortedEvents = [...session.events].sort((a, b) => 
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    )
+  const totalSpend = session.events
+    .filter(event => event.type === 'spending')
+    .reduce((sum, event) => sum + event.amount, 0)
 
-    for (const event of sortedEvents) {
-      if (event.type === 'earning') {
-        totalEarnings += event.amount
-        lastBalance += event.amount
-      } else if (event.type === 'spending') {
-        totalSpend += event.amount
-        lastBalance -= event.amount
-      } else if (event.type === 'balance') {
-        // Calculate difference from last balance and add to appropriate total
-        const difference = event.amount - lastBalance
-        if (difference > 0) {
-          totalEarnings += difference
-        } else if (difference < 0) {
-          totalSpend += Math.abs(difference)
-        }
-        lastBalance = event.amount
-      }
-    }
+  const sessionProfit = totalEarnings - totalSpend
 
-    const sessionProfit = totalEarnings - totalSpend
-    const hours = Math.max(elapsedTime / 3600000, 0.001) // Convert ms to hours, avoid division by zero
-    const profitPerHour = Math.round(sessionProfit / hours)
+  const profitPerHour = duration > 0
+    ? (sessionProfit / duration) * (1000 * 60 * 60)
+    : 0
 
-    return {
-      totalEarnings,
-      totalSpend,
-      sessionProfit,
-      profitPerHour
-    }
-  }, [session.events, session.initialBalance, elapsedTime])
+  return {
+    totalEarnings,
+    totalSpend,
+    sessionProfit,
+    profitPerHour,
+    duration
+  }
 } 

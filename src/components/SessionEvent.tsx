@@ -1,4 +1,4 @@
-import { Event } from '../App'
+import { SessionEvent as Event } from '../types'
 import { Card, CardContent } from '../components/ui/card'
 import { formatElapsedTime } from '../utils/timeFormatting'
 

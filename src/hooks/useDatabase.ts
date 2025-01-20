@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import { Session, Event } from '../App'
+import { Session, SessionEvent } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 
 export function useDatabase() {
@@ -20,8 +20,6 @@ export function useDatabase() {
 
     if (error) throw error
 
-    console.log('Raw session data from DB:', data)
-
     const mappedSessions = data.map((session: any) => ({
       id: session.id,
       description: session.description,
@@ -37,7 +35,6 @@ export function useDatabase() {
       }))
     }))
 
-    console.log('Mapped sessions:', mappedSessions)
     return mappedSessions
   }, [user])
 
@@ -72,25 +69,38 @@ export function useDatabase() {
     if (session.endTime) {
       updateData.end_time = session.endTime.toISOString()
       updateData.session_log = session.sessionLog || null
+      console.log('Session log being saved:', session.sessionLog)
     }
 
     console.log('Updating session with data:', updateData)
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('sessions')
       .update(updateData)
       .eq('id', session.id)
       .eq('user_id', user.id)
+      .select()
 
     if (error) {
       console.error('Database error updating session:', error)
       throw new Error(`Failed to update session: ${error.message}`)
     }
+
+    console.log('Session update response:', data)
   }, [user])
 
   const deleteSession = useCallback(async (sessionId: string) => {
     if (!user) throw new Error('User not authenticated')
 
+    // First update the logs to remove their session_id
+    const { error: updateError } = await supabase
+      .from('captain_logs')
+      .update({ session_id: null })
+      .eq('session_id', sessionId)
+
+    if (updateError) throw updateError
+
+    // Then delete the session (this will cascade delete events but preserve logs)
     const { error } = await supabase
       .from('sessions')
       .delete()
@@ -100,7 +110,7 @@ export function useDatabase() {
     if (error) throw error
   }, [user])
 
-  const addEvent = useCallback(async (sessionId: string, event: Omit<Event, 'id'>) => {
+  const addEvent = useCallback(async (sessionId: string, event: Omit<SessionEvent, 'id'>) => {
     if (!user) throw new Error('User not authenticated')
 
     const eventData = {

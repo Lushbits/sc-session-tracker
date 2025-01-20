@@ -1,145 +1,235 @@
-import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns'
-import { Session } from '../App'
+import { useState, useMemo, useEffect } from 'react'
+import { Session } from '../types'
 import { Button } from './ui/button'
-import { Trash2Icon, SearchIcon } from 'lucide-react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table"
+import { Search, Trash2 } from 'lucide-react'
+import { formatNumber } from '../utils/numberFormatting'
+import { useSessionStats } from '../hooks/useSessionStats'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from './ui/dialog'
+import { Input } from './ui/input'
+import { SessionDetailsDialog } from './SessionDetailsDialog'
+import { DeleteSessionDialog } from './DeleteSessionDialog'
+import { useCaptainLogs } from '../hooks/useCaptainLogs'
+import { formatTimeAgo } from '../utils/timeFormatting'
+import { formatLocalDateTime } from '../utils/dateFormatting'
 
 interface SessionListProps {
   sessions: Session[]
   onDeleteSession: (sessionId: string) => void
-  onViewSessionDetails: (session: Session) => void
+  onCreateSession: (description: string, initialBalance: number) => void
+  lastCompletedSessionBalance?: number
 }
 
-export default function SessionList({ sessions, onDeleteSession, onViewSessionDetails }: SessionListProps) {
-  const getSessionStats = (session: Session) => {
-    let totalEarnings = 0
-    let totalSpend = 0
-    let lastBalance = session.initialBalance
+export default function SessionList({ sessions, onDeleteSession, onCreateSession, lastCompletedSessionBalance }: SessionListProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false)
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null)
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null)
+  const [description, setDescription] = useState('')
+  const [initialBalance, setInitialBalance] = useState(lastCompletedSessionBalance || 0)
 
-    // Sort events chronologically
-    const sortedEvents = [...session.events].sort((a, b) => 
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    )
+  // Get logs for the session being deleted
+  const { logs } = useCaptainLogs(sessionToDelete)
 
-    for (const event of sortedEvents) {
-      if (event.type === 'earning') {
-        totalEarnings += event.amount
-        lastBalance += event.amount
-      } else if (event.type === 'spending') {
-        totalSpend += event.amount
-        lastBalance -= event.amount
-      } else if (event.type === 'balance') {
-        // Calculate difference from last balance and add to appropriate total
-        const difference = event.amount - lastBalance
-        if (difference > 0) {
-          totalEarnings += difference
-        } else if (difference < 0) {
-          totalSpend += Math.abs(difference)
+  useEffect(() => {
+    if (isDialogOpen) {
+      setInitialBalance(lastCompletedSessionBalance || 0)
+    }
+  }, [isDialogOpen, lastCompletedSessionBalance])
+
+  const sessionStats = useMemo(() => {
+    return sessions
+      .filter(s => s.endTime)
+      .map(session => {
+        const duration = session.endTime 
+          ? Math.floor((new Date(session.endTime).getTime() - new Date(session.startTime).getTime()))
+          : 0
+        const stats = useSessionStats(session, duration)
+        const durationInMinutes = Math.floor(duration / (1000 * 60))
+        const hours = Math.floor(durationInMinutes / 60)
+        const minutes = durationInMinutes % 60
+
+        return {
+          session,
+          stats,
+          duration: { hours, minutes }
         }
-        lastBalance = event.amount
-      }
-    }
+      })
+  }, [sessions])
 
-    const profit = totalEarnings - totalSpend
-    const duration = intervalToDuration({ start: session.startTime, end: session.endTime || new Date() })
-    const formattedDuration = formatDuration(duration, { format: ['hours', 'minutes'] })
-
-    return {
-      totalEarnings,
-      totalSpend,
-      profit,
-      duration: formattedDuration || 'Less than a minute'
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onCreateSession(description, initialBalance)
+    setDescription('')
+    setInitialBalance(0)
+    setIsDialogOpen(false)
   }
 
-  // Sort sessions by start time (newest first)
-  const sortedSessions = [...sessions].sort((a, b) => 
-    new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
-  )
+  const handleViewDetails = (session: Session) => {
+    setSelectedSession(session)
+    setIsDetailsDialogOpen(true)
+  }
 
-  if (sessions.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        No sessions recorded yet. Start a new session to begin tracking.
-      </div>
-    )
+  const handleDeleteClick = (sessionId: string) => {
+    setSessionToDelete(sessionId)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (sessionToDelete) {
+      try {
+        await onDeleteSession(sessionToDelete)
+        setSessionToDelete(null)
+      } catch (error) {
+        console.error('Failed to delete session:', error)
+        throw error
+      }
+    }
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Session</TableHead>
-          <TableHead className="text-right">Earnings</TableHead>
-          <TableHead className="text-right">Spend</TableHead>
-          <TableHead className="text-right">Profit</TableHead>
-          <TableHead className="text-right">Duration</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {sortedSessions.map(session => {
-          const stats = getSessionStats(session)
-          return (
-            <TableRow key={session.id}>
-              <TableCell>
-                <div>
-                  <div className="font-medium">{session.description}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {formatDistanceToNow(session.startTime)} ago
-                    {session.endTime && ' • Completed'}
+    <div className="container mx-auto px-4 py-12">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-2xl font-semibold">Previous Sessions</h2>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-primary text-primary-foreground shadow hover:bg-primary/90">Start New Session</Button>
+          </DialogTrigger>
+          <DialogContent className="bg-background/95 border">
+            <DialogHeader>
+              <DialogTitle>Start New Session</DialogTitle>
+              <DialogDescription>
+                Enter the session details to start tracking your earnings.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="description" className="text-sm font-medium">
+                  Activity Description
+                </label>
+                <Input
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="e.g., Mining, Trading, Bounty Hunting"
+                  className="border-primary/20 focus:border-primary bg-background/50"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="initialBalance" className="text-sm font-medium">
+                  Initial Balance (aUEC)
+                </label>
+                <Input
+                  id="initialBalance"
+                  type="text"
+                  value={formatNumber(initialBalance)}
+                  onChange={(e) => {
+                    // Remove all non-digit characters and parse as number
+                    const value = Number(e.target.value.replace(/[^\d]/g, ''))
+                    setInitialBalance(isNaN(value) ? 0 : value)
+                  }}
+                  className="border-primary/20 focus:border-primary bg-background/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button 
+                  type="button" 
+                  variant="ghost"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  variant="default"
+                  disabled={!description.trim()}
+                >
+                  Start Session
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div>
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="text-left py-2 px-4 text-xs font-normal text-muted-foreground">Session</th>
+              <th className="text-right py-2 px-4 text-xs font-normal text-muted-foreground">Earnings</th>
+              <th className="text-right py-2 px-4 text-xs font-normal text-muted-foreground">Spend</th>
+              <th className="text-right py-2 px-4 text-xs font-normal text-muted-foreground">Profit</th>
+              <th className="text-right py-2 px-4 text-xs font-normal text-muted-foreground">Duration</th>
+              <th className="text-right py-2 px-4 text-xs font-normal text-muted-foreground">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sessionStats.map(({ session, stats, duration }) => (
+              <tr key={session.id} className="hover:bg-white/5 border-t border-white/5">
+                <td className="py-5 px-4">
+                  <div className="text-sm">{session.description}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {formatTimeAgo(session.startTime)} • {formatLocalDateTime(session.startTime)} • Completed
                   </div>
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                <span className="event-earning">
-                  +{stats.totalEarnings.toLocaleString()} aUEC
-                </span>
-              </TableCell>
-              <TableCell className="text-right">
-                <span className="event-spending">
-                  -{stats.totalSpend.toLocaleString()} aUEC
-                </span>
-              </TableCell>
-              <TableCell className="text-right">
-                <span className={stats.profit >= 0 ? 'event-earning' : 'event-spending'}>
-                  {stats.profit >= 0 ? '+' : ''}{stats.profit.toLocaleString()} aUEC
-                </span>
-              </TableCell>
-              <TableCell className="text-right">
-                {stats.duration}
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onViewSessionDetails(session)}
-                    className="session-view-button"
-                  >
-                    <SearchIcon className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDeleteSession(session.id)}
-                    className="session-delete-button"
-                  >
-                    <Trash2Icon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          )
-        })}
-      </TableBody>
-    </Table>
+                </td>
+                <td className="py-5 px-4 text-right whitespace-nowrap">
+                  <span className="event-earning text-sm">
+                    {stats.totalEarnings > 0 ? `+${formatNumber(stats.totalEarnings)} aUEC` : '+0 aUEC'}
+                  </span>
+                </td>
+                <td className="py-5 px-4 text-right whitespace-nowrap">
+                  <span className="event-spending text-sm">
+                    {stats.totalSpend > 0 ? `-${formatNumber(stats.totalSpend)} aUEC` : '-0 aUEC'}
+                  </span>
+                </td>
+                <td className="py-5 px-4 text-right whitespace-nowrap">
+                  <span className={`${stats.sessionProfit >= 0 ? 'event-earning' : 'event-spending'} text-sm`}>
+                    {stats.sessionProfit > 0 ? '+' : ''}{formatNumber(stats.sessionProfit)} aUEC
+                  </span>
+                </td>
+                <td className="py-5 px-4 text-right whitespace-nowrap text-muted-foreground text-sm">
+                  {duration.hours} hours {duration.minutes} minutes
+                </td>
+                <td className="py-5 px-4">
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-primary hover:text-primary-foreground transition-colors"
+                      onClick={() => handleViewDetails(session)}
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                      onClick={() => handleDeleteClick(session.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <SessionDetailsDialog
+        session={selectedSession}
+        isOpen={isDetailsDialogOpen}
+        onOpenChange={setIsDetailsDialogOpen}
+      />
+
+      <DeleteSessionDialog
+        sessionId={sessionToDelete}
+        isOpen={!!sessionToDelete}
+        onOpenChange={(open) => !open && setSessionToDelete(null)}
+        onConfirmDelete={handleDeleteConfirm}
+        logCount={logs.length}
+      />
+    </div>
   )
 } 

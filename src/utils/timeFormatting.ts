@@ -34,4 +34,13 @@ export function formatSeconds(seconds: number): string {
   return hours > 0 
     ? `${hours}:${remainingMinutes.toString().padStart(2, '0')}`
     : `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`
+}
+
+/**
+ * Formats a date into "X days ago" format
+ */
+export function formatTimeAgo(date: Date): string {
+  const now = new Date()
+  const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
+  return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`
 } 

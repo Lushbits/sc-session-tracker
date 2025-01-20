@@ -94,6 +94,55 @@ export type Database = {
           created_at?: string
         }
       }
+      captain_logs: {
+        Row: {
+          id: string
+          session_id: string
+          user_id: string
+          text: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          user_id: string
+          text: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          session_id?: string
+          user_id?: string
+          text?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      log_images: {
+        Row: {
+          id: string
+          log_id: string
+          user_id: string
+          storage_path: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          log_id: string
+          user_id: string
+          storage_path: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          log_id?: string
+          user_id?: string
+          storage_path?: string
+          created_at?: string
+        }
+      }
     }
   }
 } 
