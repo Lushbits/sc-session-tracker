@@ -1,59 +1,5 @@
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
-
-export interface VersionHistoryEntry {
-  version: string
-  date: string
-  changes: string[]
-}
-
-export const versionHistory: VersionHistoryEntry[] = [
-  {
-    version: '0.3.0',
-    date: '2025-01-20',
-    changes: [
-      'Added Captain\'s Log feature for documenting session experiences with image support',
-      'Redesigned landing page with feature showcase and interactive image previews',
-      'Added Community Logs section (coming soon)',
-      'Improved session details view with better scrolling and animations',
-      'Enhanced date and time display across the application',
-      'Added visual feedback for interactive elements',
-      'Improved UI consistency and animations throughout the app',
-      'Fixed various bugs and improved performance'
-    ]
-  },
-  {
-    version: '0.2.5',
-    date: '2025-01-17',
-    changes: [
-      'Added feedback form with email integration',
-      'Enhanced button hover effects and animations',
-      'Improved UI consistency across the app',
-      'Updated dialog box and chart background colors'
-    ]
-  },
-  {
-    version: '0.2.0',
-    date: '2025-01-16',
-    changes: [
-      'Improved landing page with feature showcase and screenshots',
-      'Added session logs feature for tracking session details',
-      'Simplified authentication to Discord-only login',
-      'Enhanced UI with gradient backgrounds and improved spacing',
-      'Added automatic balance carry-forward from previous sessions',
-      'Fixed double event creation in balance updates'
-    ]
-  },
-  {
-    version: '0.1.0',
-    date: '2025-01-15',
-    changes: [
-      'Initial beta release',
-      'Basic session tracking functionality',
-      'Discord authentication'
-    ]
-  }
-]
+import { VersionHistoryDialog, versionHistory } from './VersionHistory'
 
 export function Footer() {
   const [showVersionHistory, setShowVersionHistory] = useState(false)
@@ -74,8 +20,8 @@ export function Footer() {
           </a>
         </div>
         
-        <div className="text-center">
-        Feedback very welcome! It's a beta app and I'm happy to add more features, fix bugs, and improve the experience for you. Feel free to support the project by either sending some sweet, sweet aUEC ingame to{' '}
+        <div className="text-center w-1/2 pl-12 pr-12">
+          Feel free to support the project by either sending some sweet, sweet aUEC ingame to{' '}
           <a
             href="https://robertsspaceindustries.com/citizens/Lushbits"
             target="_blank"
@@ -102,32 +48,12 @@ export function Footer() {
         >
           Version {currentVersion} (Beta)
         </button>
-      </div>
 
-      <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Version History</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6">
-            {versionHistory.map((entry) => (
-              <div key={entry.version} className="space-y-2">
-                <div className="font-semibold">
-                  Version {entry.version}
-                  <span className="text-muted-foreground font-normal ml-2">
-                    ({entry.date})
-                  </span>
-                </div>
-                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                  {entry.changes.map((change, index) => (
-                    <li key={index}>{change}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
+        <VersionHistoryDialog 
+          open={showVersionHistory} 
+          onOpenChange={setShowVersionHistory} 
+        />
+      </div>
     </footer>
   )
 } 

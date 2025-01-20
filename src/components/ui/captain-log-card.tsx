@@ -18,6 +18,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { formatLocalDateTime } from '@/utils/dateFormatting'
+import { deleteLogImages } from '@/utils/storage'
 
 interface CaptainLogCardProps {
   log: CaptainLog
@@ -59,6 +60,10 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
     setIsDeleting(true)
     setIsRemoving(true)
     try {
+      // First delete all associated images
+      await deleteLogImages(log.id, user.id)
+
+      // Then delete the log entry
       const { error } = await supabase
         .from('captain_logs')
         .delete()

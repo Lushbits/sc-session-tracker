@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { CaptainLog, CaptainLogImage } from '../types'
 import { useAuth } from '../contexts/AuthContext'
+import { deleteLogImages } from '../utils/storage'
 
 export function useCaptainLogs(sessionId: string | null | undefined) {
   const [logs, setLogs] = useState<CaptainLog[]>([])
@@ -150,6 +151,10 @@ export function useCaptainLogs(sessionId: string | null | undefined) {
     if (!user || !sessionId) return
 
     try {
+      // First delete all associated images
+      await deleteLogImages(logId, user.id)
+
+      // Then delete the log entry
       const { error } = await supabase
         .from('captain_logs')
         .delete()
@@ -169,6 +174,7 @@ export function useCaptainLogs(sessionId: string | null | undefined) {
     isLoading,
     addLog,
     updateLog,
-    deleteLog
+    deleteLog,
+    setLogs
   }
 } 

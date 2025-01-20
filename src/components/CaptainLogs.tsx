@@ -16,6 +16,11 @@ import {
 } from "./ui/alert-dialog"
 import { useToast } from "./ui/use-toast"
 import { formatLocalDateTime } from '../utils/dateFormatting'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
+import { deleteLogImages } from '../utils/storage'
+import { cn } from '@/lib/utils'
+import { CaptainLog } from '../types'
 
 interface CaptainLogsProps {
   sessionId: string
@@ -29,9 +34,11 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [logToDelete, setLogToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isRemoving, setIsRemoving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { logs, addLog, deleteLog } = useCaptainLogs(sessionId)
+  const { logs, addLog, setLogs } = useCaptainLogs(sessionId)
   const { toast } = useToast()
+  const { user } = useAuth()
 
   const handleImagePaste = (e: React.ClipboardEvent) => {
     const items = e.clipboardData?.items
@@ -92,22 +99,41 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
   }
 
   const handleDeleteConfirm = async () => {
-    if (!logToDelete) return
+    if (!logToDelete || !user) return
 
     setIsDeleting(true)
+    setIsRemoving(true)
     try {
-      await deleteLog(logToDelete)
+      const imageDeleteResult = await deleteLogImages(logToDelete, user.id)
+      if (!imageDeleteResult.success) {
+        throw new Error('Failed to delete images')
+      }
+
+      const { error } = await supabase
+        .from('captain_logs')
+        .delete()
+        .eq('id', logToDelete)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      setLogs((prevLogs: CaptainLog[]) => 
+        prevLogs.filter((log: CaptainLog) => log.id !== logToDelete)
+      )
+
       toast({
         title: "Log deleted",
         description: "Your captain's log has been deleted successfully."
       })
     } catch (error) {
-      console.error('Error deleting log:', error)
+      console.error('Error in delete operation:', error)
+      setIsRemoving(false)
       toast({
         title: "Error",
         description: "Failed to delete the log. Please try again.",
         variant: "destructive"
       })
+      throw error
     } finally {
       setIsDeleting(false)
       setShowDeleteDialog(false)
@@ -196,7 +222,10 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
         {logs.map((log) => (
           <div
             key={log.id}
-            className="group rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden"
+            className={cn(
+              "group rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden transition-all duration-300",
+              logToDelete === log.id && isRemoving && "opacity-0 scale-95"
+            )}
           >
             {log.images[0] && (
               <div 
