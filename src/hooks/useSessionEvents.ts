@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react'
-import { Session, Event } from '../App'
+import { Session, SessionEvent } from '../types'
 
 interface UseSessionEventsReturn {
   currentBalance: number
-  handleAddEvent: (type: Event['type'], amount: number, description?: string) => void
+  handleAddEvent: (type: SessionEvent['type'], amount: number, description?: string) => void
   handleUpdateBalance: (newBalance: number) => void
 }
 
@@ -36,12 +36,12 @@ export function useSessionEvents(
   }, [session.events, session.initialBalance])
 
   // Handler for adding new events
-  const handleAddEvent = useCallback((type: Event['type'], amount: number, description?: string) => {
-    const newEvent: Event = {
+  const handleAddEvent = useCallback((type: SessionEvent['type'], amount: number, description?: string) => {
+    const newEvent: SessionEvent = {
       timestamp: new Date(),
       amount,
       type,
-      description
+      description: description || 'No description'
     }
 
     onUpdateSession({
@@ -52,10 +52,11 @@ export function useSessionEvents(
 
   // Handler for direct balance updates
   const handleUpdateBalance = useCallback((newBalance: number) => {
-    const newEvent: Event = {
+    const newEvent: SessionEvent = {
       timestamp: new Date(),
       amount: newBalance,
-      type: 'balance'
+      type: 'balance',
+      description: 'Balance updated'
     }
 
     onUpdateSession({
