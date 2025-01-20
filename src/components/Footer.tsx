@@ -20,7 +20,7 @@ export function Footer() {
           </a>
         </div>
         
-        <div className="text-center w-1/2 pl-12 pr-12">
+        <div className="text-center w-1/2">
           Feel free to support the project by either sending some sweet, sweet aUEC ingame to{' '}
           <a
             href="https://robertsspaceindustries.com/citizens/Lushbits"

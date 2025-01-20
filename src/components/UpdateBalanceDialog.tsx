@@ -5,6 +5,7 @@ import { SessionEvent } from '../types'
 import { BalanceInput } from './balance/BalanceInput'
 import { CategoryButtons } from './balance/CategoryButtons'
 import { CustomInputSection } from './balance/CustomInputSection'
+import { numberUtils } from '../utils/numberHandling'
 
 const EARNING_CATEGORIES = ['Mining', 'Trading', 'Bounty Hunting', 'Mission']
 const SPENDING_CATEGORIES = ['Ship Purchase', 'Ship Components', 'Consumables', 'Item Purchase']
@@ -48,27 +49,19 @@ export function UpdateBalanceDialog({
 
   const handleBalanceChange = (value: string) => {
     if (state.isCustomMode) return
-    
-    const cleaned = value.replace(/[^\d.]/g, '')
-    const num = parseFloat(cleaned)
-    if (isNaN(num)) {
-      setState({ ...state, newBalance: '' })
-    } else {
-      setState({ ...state, newBalance: num.toLocaleString() })
-    }
+    setState({ ...state, newBalance: numberUtils.formatInputValue(value) })
   }
 
   const getDifference = () => {
-    const numBalance = parseFloat(state.newBalance.replace(/,/g, ''))
-    if (isNaN(numBalance)) return 0
-    return numBalance - currentBalance
+    const numBalance = numberUtils.parseDisplayNumber(state.newBalance)
+    return numberUtils.calculateDifference(numBalance, currentBalance)
   }
 
   const handleCategorySelect = (category: string) => {
-    const numBalance = parseFloat(state.newBalance.replace(/,/g, ''))
+    const numBalance = numberUtils.parseDisplayNumber(state.newBalance)
     const difference = getDifference()
     
-    if (!isNaN(numBalance)) {
+    if (numBalance > 0) {
       if (difference > 0) {
         onAddEvent('earning', difference, category)
       } else if (difference < 0) {
@@ -84,10 +77,10 @@ export function UpdateBalanceDialog({
   }
 
   const handleCustomSubmit = () => {
-    const numBalance = parseFloat(state.newBalance.replace(/,/g, ''))
+    const numBalance = numberUtils.parseDisplayNumber(state.newBalance)
     const difference = getDifference()
     
-    if (!isNaN(numBalance) && state.customDescription) {
+    if (numBalance > 0 && state.customDescription) {
       if (difference > 0) {
         onAddEvent('earning', difference, state.customDescription)
       } else if (difference < 0) {
@@ -103,8 +96,8 @@ export function UpdateBalanceDialog({
   }
 
   const handleSimpleUpdate = () => {
-    const numBalance = parseFloat(state.newBalance.replace(/,/g, ''))
-    if (!isNaN(numBalance)) {
+    const numBalance = numberUtils.parseDisplayNumber(state.newBalance)
+    if (numBalance > 0) {
       onUpdateBalance(numBalance)
       onOpenChange(false)
       setState({

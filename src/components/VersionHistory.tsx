@@ -8,6 +8,13 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.3.2',
+    date: '2025-01-20',
+    changes: [
+      'Bugfix: Implement consistent number formatting for balance and other numeric values regardless of locale or user settings',
+    ]
+  },
+  {
     version: '0.3.1',
     date: '2025-01-20',
     changes: [

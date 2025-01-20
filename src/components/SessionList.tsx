@@ -11,6 +11,7 @@ import { DeleteSessionDialog } from './DeleteSessionDialog'
 import { useCaptainLogs } from '../hooks/useCaptainLogs'
 import { formatTimeAgo } from '../utils/timeFormatting'
 import { formatLocalDateTime } from '../utils/dateFormatting'
+import { numberUtils } from '../utils/numberHandling'
 
 interface SessionListProps {
   sessions: Session[]
@@ -121,11 +122,10 @@ export default function SessionList({ sessions, onDeleteSession, onCreateSession
                 <Input
                   id="initialBalance"
                   type="text"
-                  value={formatNumber(initialBalance)}
+                  value={numberUtils.formatDisplayNumber(initialBalance)}
                   onChange={(e) => {
-                    // Remove all non-digit characters and parse as number
-                    const value = Number(e.target.value.replace(/[^\d]/g, ''))
-                    setInitialBalance(isNaN(value) ? 0 : value)
+                    const value = numberUtils.parseDisplayNumber(e.target.value)
+                    setInitialBalance(value)
                   }}
                   className="border-primary/20 focus:border-primary bg-background/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   required

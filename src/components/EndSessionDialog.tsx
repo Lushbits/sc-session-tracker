@@ -4,6 +4,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { SessionEvent } from '../types'
+import { numberUtils } from '../utils/numberHandling'
 
 interface EndSessionDialogProps {
   currentBalance: number
@@ -20,29 +21,22 @@ export function EndSessionDialog({
   onEndSession,
   onAddEvent
 }: EndSessionDialogProps) {
-  const [finalBalance, setFinalBalance] = useState(() => currentBalance.toLocaleString())
+  const [finalBalance, setFinalBalance] = useState(() => numberUtils.formatDisplayNumber(currentBalance))
   const [sessionLog, setSessionLog] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const handleBalanceChange = (value: string) => {
-    const cleaned = value.replace(/[^\d.]/g, '')
-    const num = parseFloat(cleaned)
-    if (isNaN(num)) {
-      setFinalBalance('')
-    } else {
-      setFinalBalance(num.toLocaleString())
-    }
+    setFinalBalance(numberUtils.formatInputValue(value))
   }
 
   const getDifference = () => {
-    const numBalance = parseFloat(finalBalance.replace(/,/g, ''))
-    if (isNaN(numBalance)) return 0
-    return numBalance - currentBalance
+    const numBalance = numberUtils.parseDisplayNumber(finalBalance)
+    return numberUtils.calculateDifference(numBalance, currentBalance)
   }
 
   const handleEndSession = async () => {
-    const numBalance = parseFloat(finalBalance.replace(/,/g, ''))
-    if (!isNaN(numBalance)) {
+    const numBalance = numberUtils.parseDisplayNumber(finalBalance)
+    if (numBalance > 0) {
       try {
         setError(null)
         // Create a balance event for the final balance
@@ -59,7 +53,7 @@ export function EndSessionDialog({
   // Reset state when dialog is opened/closed
   useEffect(() => {
     if (isOpen) {
-      setFinalBalance(currentBalance.toLocaleString())
+      setFinalBalance(numberUtils.formatDisplayNumber(currentBalance))
       setSessionLog('')
       setError(null)
     }
@@ -83,7 +77,7 @@ export function EndSessionDialog({
 
         <div className="space-y-4">
           <div>
-            <Label>Current Balance: {currentBalance.toLocaleString()} aUEC</Label>
+            <Label>Current Balance: {numberUtils.formatDisplayNumber(currentBalance)} aUEC</Label>
             <Input
               type="text"
               value={finalBalance}
