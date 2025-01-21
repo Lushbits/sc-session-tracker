@@ -18,7 +18,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { formatLocalDateTime } from '@/utils/dateFormatting'
-import { deleteLogImages, getTransformedImageUrl } from '@/utils/storage'
+import { deleteLogImages, getTransformedImageUrl, getOriginalImageUrl } from '@/utils/storage'
 
 interface CaptainLogCardProps {
   log: CaptainLog
@@ -103,19 +103,32 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
           "hover:scale-[1.01] hover:border-primary hover:shadow-[0_0_15px_rgba(var(--primary-rgb)/0.15)]"
         )}
       >
-        {log.images[0] && (
-          <div className="w-full overflow-hidden">
-            <img
-              src={getTransformedImageUrl(log.images[0].storage_path, { 
-                width: 400, 
-                height: 170, 
-                quality: 85,
-                resize: 'cover'
-              })}
-              alt="Log attachment"
-              className="w-full h-[170px] object-cover cursor-pointer"
-              onClick={() => setShowFullImage(true)}
-            />
+        {log.images.length > 0 && (
+          <div>
+            <a
+              href={getOriginalImageUrl(log.images[0].storage_path)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <img
+                src={getTransformedImageUrl(log.images[0].storage_path, {
+                  width: 400,
+                  height: 170,
+                  quality: 85,
+                  resize: 'cover'
+                })}
+                alt="Log attachment"
+                className="w-full h-[170px] object-cover hover:opacity-90 transition-opacity"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowFullImage(true);
+                }}
+              />
+            </a>
           </div>
         )}
         
@@ -234,7 +247,7 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
               />
               <div className="mt-2 text-center">
                 <a
-                  href={log.images[0].storage_path}
+                  href={getOriginalImageUrl(log.images[0].storage_path)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline text-sm"

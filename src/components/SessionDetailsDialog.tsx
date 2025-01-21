@@ -11,6 +11,7 @@ import { useChartData } from '../hooks/useChartData'
 import { formatNumber } from '../utils/numberFormatting'
 import { formatElapsedTime } from '../utils/timeFormatting'
 import { formatLocalDateTime } from '../utils/dateFormatting'
+import { getTransformedImageUrl, getOriginalImageUrl } from '../utils/storage'
 
 const DEFAULT_SESSION: Session = {
   id: '',
@@ -40,7 +41,7 @@ export function SessionDetailsDialog({
   const scrollViewportRef = useRef<HTMLDivElement>(null)
   
   // Always call hooks at the top level with default values
-  const { logs, isLoading } = useCaptainLogs(session?.id || null)
+  const { logs = [], isLoading, error } = useCaptainLogs(session?.id || null)
   const stats = useSessionStats(session || DEFAULT_SESSION, elapsedTime)
   const { chartData } = useChartData(session || DEFAULT_SESSION)
 
@@ -272,6 +273,8 @@ export function SessionDetailsDialog({
                 <h3 className="text-lg font-medium mb-2">Captain's Logs</h3>
                 {isLoading ? (
                   <p className="text-sm text-muted-foreground">Loading logs...</p>
+                ) : error ? (
+                  <p className="text-sm text-destructive">Error loading logs: {error.message}</p>
                 ) : logs.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No logs recorded for this session.</p>
                 ) : (
@@ -281,19 +284,29 @@ export function SessionDetailsDialog({
                         key={log.id}
                         className="bg-[#1a1b1e] rounded-lg overflow-hidden"
                       >
-                        {log.images.length > 0 && (
-                          <a
-                            href={log.images[0].storage_path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block w-full"
-                          >
-                            <img
-                              src={log.images[0].storage_path}
-                              alt="Log attachment"
-                              className="w-full h-[200px] object-cover hover:opacity-90 transition-opacity"
-                            />
-                          </a>
+                        {log.images?.length > 0 && (
+                          <div>
+                            <a
+                              href={getOriginalImageUrl(log.images[0].storage_path)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block w-full"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            >
+                              <img
+                                src={getTransformedImageUrl(log.images[0].storage_path, {
+                                  width: 800,
+                                  height: 343,
+                                  quality: 85,
+                                  resize: 'cover'
+                                })}
+                                alt="Log attachment"
+                                className="w-full h-[343px] object-cover hover:opacity-90 transition-opacity"
+                              />
+                            </a>
+                          </div>
                         )}
                         <div className="p-4">
                           <div className="text-sm text-muted-foreground mb-2">

@@ -13,6 +13,7 @@ import { supabase } from './lib/supabase'
 import { useCaptainLogs } from './hooks/useCaptainLogs'
 import { FeedbackDialog } from './components/FeedbackDialog'
 import { LandingPage } from './components/LandingPage'
+import { CommunityLogView } from './components/CommunityLogView'
 
 function App() {
   const [sessions, setSessions] = useState<Session[]>([])
@@ -243,15 +244,7 @@ function App() {
           ) : view === 'logs' ? (
             <CaptainLogView />
           ) : (
-            <div className="container mx-auto px-4 py-12">
-              <div className="flex flex-col items-center justify-center space-y-4 text-center">
-                <h2 className="text-2xl font-semibold tracking-tight mb-4">Community Logs</h2>
-                <p className="text-muted-foreground max-w-2xl">
-                  Here you will be able to view public log entries from your fellow citizens as well as share your own cool space adventures with the world.
-                </p>
-                <p className="text-primary font-semibold">Stay tuned, coming soon!</p>
-              </div>
-            </div>
+            <CommunityLogView />
           )}
         </main>
 

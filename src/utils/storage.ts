@@ -25,6 +25,13 @@ export function getTransformedImageUrl(path: string, options: ImageOptions = {})
     .data.publicUrl
 }
 
+export function getOriginalImageUrl(path: string) {
+  return supabase.storage
+    .from('log_images')
+    .getPublicUrl(path)
+    .data.publicUrl
+}
+
 /**
  * Deletes all images associated with a captain's log entry from both storage and database
  * @param logId The ID of the captain's log entry
@@ -46,28 +53,28 @@ export async function deleteLogImages(logId: string, userId: string) {
       return { success: true }
     }
 
-    // 2. Delete files from storage bucket
+    // 2. Delete the images from storage
     for (const image of images) {
-      const { error: storageError } = await supabase
+      const { error: deleteError } = await supabase
         .storage
         .from('log_images')
         .remove([image.storage_path])
 
-      if (storageError) throw storageError
+      if (deleteError) throw deleteError
     }
 
-    // 3. Delete image records from log_images table
-    const { error: deleteError } = await supabase
+    // 3. Delete the image records from the database
+    const { error: deleteRecordsError } = await supabase
       .from('log_images')
       .delete()
       .eq('log_id', logId)
       .eq('user_id', userId)
 
-    if (deleteError) throw deleteError
+    if (deleteRecordsError) throw deleteRecordsError
 
     return { success: true }
   } catch (error) {
-    console.error('Error deleting log images:', error)
-    throw error
+    console.error('Error deleting images:', error)
+    return { success: false, error }
   }
 } 

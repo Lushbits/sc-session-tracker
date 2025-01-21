@@ -7,15 +7,18 @@ import { deleteLogImages } from '../utils/storage'
 export function useCaptainLogs(sessionId: string | null | undefined) {
   const [logs, setLogs] = useState<CaptainLog[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
   const { user } = useAuth()
 
   useEffect(() => {
     if (!user || !sessionId) {
       setLogs([])
       setIsLoading(false)
+      setError(null)
       return
     }
 
+    let isMounted = true
     fetchLogs()
     
     // Subscribe to changes
@@ -30,12 +33,15 @@ export function useCaptainLogs(sessionId: string | null | undefined) {
           filter: `session_id=eq.${sessionId}`
         },
         () => {
-          fetchLogs()
+          if (isMounted) {
+            fetchLogs()
+          }
         }
       )
       .subscribe()
 
     return () => {
+      isMounted = false
       supabase.removeChannel(channel)
     }
   }, [sessionId, user])
@@ -44,6 +50,7 @@ export function useCaptainLogs(sessionId: string | null | undefined) {
     if (!user || !sessionId) return
 
     try {
+      setError(null)
       const { data: logs, error } = await supabase
         .from('captain_logs')
         .select(`
@@ -63,15 +70,16 @@ export function useCaptainLogs(sessionId: string | null | undefined) {
       // Transform logs to include public URLs for images
       const logsWithUrls = logs.map(log => ({
         ...log,
-        images: log.log_images.map((image: CaptainLogImage) => ({
+        images: log.log_images?.map((image: CaptainLogImage) => ({
           ...image,
           storage_path: image.storage_path // Keep the original path for transformations
-        }))
+        })) || []
       }))
 
       setLogs(logsWithUrls)
     } catch (error) {
       console.error('Error fetching logs:', error)
+      setError(error instanceof Error ? error : new Error('Failed to fetch logs'))
     } finally {
       setIsLoading(false)
     }
@@ -169,6 +177,7 @@ export function useCaptainLogs(sessionId: string | null | undefined) {
   return {
     logs,
     isLoading,
+    error,
     addLog,
     updateLog,
     deleteLog,

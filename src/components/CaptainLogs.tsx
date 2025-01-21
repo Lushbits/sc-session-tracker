@@ -18,7 +18,7 @@ import { useToast } from "./ui/use-toast"
 import { formatLocalDateTime } from '../utils/dateFormatting'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { deleteLogImages, getTransformedImageUrl } from '../utils/storage'
+import { deleteLogImages, getTransformedImageUrl, getOriginalImageUrl } from '../utils/storage'
 import { cn } from '@/lib/utils'
 import { CaptainLog } from '../types'
 
@@ -228,20 +228,31 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
             )}
           >
             {log.images[0] && (
-              <div 
-                className="cursor-pointer"
-                onClick={() => setViewImageUrl(log.images[0].storage_path)}
-              >
-                <img
-                  src={getTransformedImageUrl(log.images[0].storage_path, { 
-                    width: 800, 
-                    height: 200, 
-                    quality: 85,
-                    resize: 'cover'
-                  })}
-                  alt="Log attachment"
-                  className="w-full h-[200px] object-cover"
-                />
+              <div>
+                <a
+                  href={getOriginalImageUrl(log.images[0].storage_path)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <img
+                    src={getTransformedImageUrl(log.images[0].storage_path, {
+                      width: 800,
+                      height: 200,
+                      quality: 85,
+                      resize: 'cover'
+                    })}
+                    alt="Log attachment"
+                    className="w-full h-[200px] object-cover hover:opacity-90 transition-opacity cursor-pointer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setViewImageUrl(log.images[0].storage_path);
+                    }}
+                  />
+                </a>
               </div>
             )}
             <div className="p-4 space-y-2">
@@ -286,7 +297,7 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
               />
               <div className="mt-2 text-center">
                 <a
-                  href={viewImageUrl}
+                  href={getOriginalImageUrl(viewImageUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline text-sm"
