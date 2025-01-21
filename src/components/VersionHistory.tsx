@@ -8,6 +8,16 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.3.4',
+    date: '2025-01-21',
+    changes: [
+      'Improved image quality in Captain\'s Log with Supabase image transformations',
+      'Enhanced image display with proper aspect ratio and optimized loading',
+      'Added "Open original in new tab" feature for full-size image viewing',
+      'Reorganized image preview in the log entry form for better UX'
+    ]
+  },
+  {
     version: '0.3.3',
     date: '2025-01-20',
     changes: [

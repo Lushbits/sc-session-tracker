@@ -18,7 +18,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { formatLocalDateTime } from '@/utils/dateFormatting'
-import { deleteLogImages } from '@/utils/storage'
+import { deleteLogImages, getTransformedImageUrl } from '@/utils/storage'
 
 interface CaptainLogCardProps {
   log: CaptainLog
@@ -106,9 +106,14 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
         {log.images[0] && (
           <div className="w-full overflow-hidden">
             <img
-              src={log.images[0].storage_path}
+              src={getTransformedImageUrl(log.images[0].storage_path, { 
+                width: 400, 
+                height: 170, 
+                quality: 85,
+                resize: 'cover'
+              })}
               alt="Log attachment"
-              className="w-full h-full object-cover aspect-[16/10] cursor-pointer"
+              className="w-full h-[170px] object-cover cursor-pointer"
               onClick={() => setShowFullImage(true)}
             />
           </div>
@@ -188,7 +193,11 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
           <div className="space-y-4">
             {log.images[0] && (
               <img
-                src={log.images[0].storage_path}
+                src={getTransformedImageUrl(log.images[0].storage_path, { 
+                  width: 800,
+                  quality: 90,
+                  resize: 'contain'
+                })}
                 alt="Log attachment"
                 className="w-full rounded-lg"
                 onClick={() => {
@@ -213,11 +222,27 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
             <DialogTitle>Image</DialogTitle>
           </DialogHeader>
           {log.images[0] && (
-            <img
-              src={log.images[0].storage_path}
-              alt="Full size"
-              className="w-full rounded-lg"
-            />
+            <>
+              <img
+                src={getTransformedImageUrl(log.images[0].storage_path, { 
+                  width: 1200,
+                  quality: 95,
+                  resize: 'contain'
+                })}
+                alt="Full size"
+                className="w-full max-h-[80vh] object-contain rounded-lg"
+              />
+              <div className="mt-2 text-center">
+                <a
+                  href={log.images[0].storage_path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline text-sm"
+                >
+                  Open original in new tab
+                </a>
+              </div>
+            </>
           )}
         </DialogContent>
       </Dialog>

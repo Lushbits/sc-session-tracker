@@ -18,7 +18,7 @@ import { useToast } from "./ui/use-toast"
 import { formatLocalDateTime } from '../utils/dateFormatting'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { deleteLogImages } from '../utils/storage'
+import { deleteLogImages, getTransformedImageUrl } from '../utils/storage'
 import { cn } from '@/lib/utils'
 import { CaptainLog } from '../types'
 
@@ -145,21 +145,12 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
     <div className="space-y-4">
       <form onSubmit={handleSubmit}>
         <div className="rounded-lg border bg-card">
-          <Textarea
-            value={newLogText}
-            onChange={(e) => setNewLogText(e.target.value)}
-            onPaste={handleImagePaste}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            placeholder="Write a new Captain's Log..."
-            className="min-h-[180px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 scrollbar-thin scrollbar-thumb-secondary scrollbar-track-secondary/20 hover:scrollbar-thumb-secondary/80"
-          />
           {imagePreviewUrl && (
-            <div className="relative border-t">
+            <div className="relative border-b">
               <img 
                 src={imagePreviewUrl} 
                 alt="Preview" 
-                className="w-full h-auto object-cover"
+                className="w-full h-auto object-contain"
               />
               <Button
                 type="button"
@@ -178,6 +169,15 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
               </Button>
             </div>
           )}
+          <Textarea
+            value={newLogText}
+            onChange={(e) => setNewLogText(e.target.value)}
+            onPaste={handleImagePaste}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            placeholder="Write a new Captain's Log..."
+            className="min-h-[180px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 scrollbar-thin scrollbar-thumb-secondary scrollbar-track-secondary/20 hover:scrollbar-thumb-secondary/80"
+          />
           <div className="flex items-center justify-between border-t p-2 px-3">
             {!selectedImage && (
               <div className="flex items-center gap-3 text-muted-foreground text-sm">
@@ -233,9 +233,14 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
                 onClick={() => setViewImageUrl(log.images[0].storage_path)}
               >
                 <img
-                  src={log.images[0].storage_path}
+                  src={getTransformedImageUrl(log.images[0].storage_path, { 
+                    width: 800, 
+                    height: 200, 
+                    quality: 85,
+                    resize: 'cover'
+                  })}
                   alt="Log attachment"
-                  className="w-full h-auto object-cover"
+                  className="w-full h-[200px] object-cover"
                 />
               </div>
             )}
@@ -269,11 +274,27 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
             <DialogDescription>View the full size image from your log entry.</DialogDescription>
           </DialogHeader>
           {viewImageUrl && (
-            <img
-              src={viewImageUrl}
-              alt="Full size"
-              className="w-full h-auto"
-            />
+            <>
+              <img
+                src={getTransformedImageUrl(viewImageUrl, { 
+                  width: 1200,
+                  quality: 95,
+                  resize: 'contain'
+                })}
+                alt="Full size"
+                className="w-full h-auto"
+              />
+              <div className="mt-2 text-center">
+                <a
+                  href={viewImageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline text-sm"
+                >
+                  Open original in new tab
+                </a>
+              </div>
+            </>
           )}
         </DialogContent>
       </Dialog>

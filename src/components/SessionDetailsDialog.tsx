@@ -291,7 +291,7 @@ export function SessionDetailsDialog({
                             <img
                               src={log.images[0].storage_path}
                               alt="Log attachment"
-                              className="w-full h-auto object-cover aspect-[16/10] hover:opacity-90 transition-opacity"
+                              className="w-full h-[200px] object-cover hover:opacity-90 transition-opacity"
                             />
                           </a>
                         )}

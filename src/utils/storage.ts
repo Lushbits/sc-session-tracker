@@ -1,5 +1,30 @@
 import { supabase } from '../lib/supabase'
 
+interface ImageOptions {
+  width?: number
+  height?: number
+  quality?: number
+  format?: 'origin'
+  resize?: 'cover' | 'contain' | 'fill'
+}
+
+export function getTransformedImageUrl(path: string, options: ImageOptions = {}) {
+  const { width, height, quality = 80, format, resize = 'cover' } = options
+  
+  return supabase.storage
+    .from('log_images')
+    .getPublicUrl(path, {
+      transform: {
+        width,
+        height,
+        quality,
+        format,
+        resize
+      }
+    })
+    .data.publicUrl
+}
+
 /**
  * Deletes all images associated with a captain's log entry from both storage and database
  * @param logId The ID of the captain's log entry

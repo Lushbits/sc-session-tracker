@@ -65,10 +65,7 @@ export function useCaptainLogs(sessionId: string | null | undefined) {
         ...log,
         images: log.log_images.map((image: CaptainLogImage) => ({
           ...image,
-          storage_path: supabase.storage
-            .from('log_images')
-            .getPublicUrl(image.storage_path)
-            .data.publicUrl
+          storage_path: image.storage_path // Keep the original path for transformations
         }))
       }))
 
