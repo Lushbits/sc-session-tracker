@@ -7,8 +7,8 @@ import { CategoryButtons } from './balance/CategoryButtons'
 import { CustomInputSection } from './balance/CustomInputSection'
 import { numberUtils } from '../utils/numberHandling'
 
-const EARNING_CATEGORIES = ['Mining', 'Trading', 'Bounty Hunting', 'Mission']
-const SPENDING_CATEGORIES = ['Ship Purchase', 'Ship Components', 'Consumables', 'Item Purchase']
+const EARNING_CATEGORIES = ['Bounty Hunting', 'Contracts', 'Ghost Hollow', 'Mining', 'Piracy', 'Salvage', 'Trading', 'Wallet App Transfer']
+const SPENDING_CATEGORIES = ['Armor & Weapons', 'Consumables & Gear', 'Repair, Refuel & Rearm', 'Ship Components', 'Ship Purchase', 'Wallet App Transfer']
 
 interface UpdateBalanceDialogProps {
   currentBalance: number
