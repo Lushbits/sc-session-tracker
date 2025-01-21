@@ -14,7 +14,8 @@ export const versionHistory: VersionHistoryEntry[] = [
       'Improved image quality in Captain\'s Log with Supabase image transformations',
       'Enhanced image display with proper aspect ratio and optimized loading',
       'Added "Open original in new tab" feature for full-size image viewing',
-      'Reorganized image preview in the log entry form for better UX'
+      'Reorganized image preview in the log entry form for better UX',
+      'Added additional default spend and earnings categories'
     ]
   },
   {
@@ -47,6 +48,7 @@ export const versionHistory: VersionHistoryEntry[] = [
       'Added Captain\'s Log feature for documenting session experiences with image support',
       'Redesigned landing page with feature showcase and interactive image previews',
       'Added Community Logs section (coming soon)',
+      'Improved session details view with better scrolling and animations',
       'Improved session details view with better scrolling and animations',
       'Enhanced date and time display across the application',
       'Added visual feedback for interactive elements',
