@@ -21,7 +21,14 @@ export function LandingPage() {
                 <span>SC Session Tracker</span>
               </h1>
               <p className="text-xl text-muted-foreground">
-                Maximize Your Star Citizen gaming sessions. Log your earnings, spending, and profits to achieve peak efficiency and build your wealth among the stars.
+                Maximize Your <a
+              href="https://play.sc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Star Citizen
+            </a> gaming sessions. Track your earnings, spend, and profits, all while documenting your adventures across the stars in your very own Captain's Log.
               </p>
             </div>
             <div className="flex flex-col items-center justify-center space-y-4">
