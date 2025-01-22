@@ -15,7 +15,7 @@ export function CommunityLogView() {
                 Here you will be able to view public log entries from your fellow citizens as well as share your own cool space adventures with the world.
               </p>
               <div className="relative">
-                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+                <div className="absolute inset-0"></div>
                 <p className="relative text-primary font-semibold text-base tracking-wide">Stay tuned, coming soon!</p>
               </div>
             </div>

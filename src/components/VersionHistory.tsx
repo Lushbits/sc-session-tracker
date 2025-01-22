@@ -8,6 +8,12 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.3.5',
+    date: '2025-01-22',
+    changes: [
+      'Added the ability to favorite Captain\'s Logs and view only favorites',
+    ]
+  },{
     version: '0.3.4',
     date: '2025-01-21',
     changes: [

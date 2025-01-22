@@ -33,6 +33,7 @@ export interface CaptainLog {
   created_at: string
   updated_at: string
   deleted_session: boolean
+  is_favorite: boolean
   images: CaptainLogImage[]
   session?: Session | null
 }

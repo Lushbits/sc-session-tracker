@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { Trash2, Heart } from 'lucide-react'
 import { CaptainLog } from '@/types'
 import { Button } from './button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './dialog'
@@ -23,10 +23,10 @@ import { deleteLogImages, getTransformedImageUrl, getOriginalImageUrl } from '@/
 interface CaptainLogCardProps {
   log: CaptainLog
   onDelete?: () => void
-  onLogDeleted?: () => void
+  onToggleFavorite?: (isFavorite: boolean) => void
 }
 
-export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardProps) {
+export function CaptainLogCard({ log, onDelete, onToggleFavorite }: CaptainLogCardProps) {
   const [showFullLog, setShowFullLog] = useState(false)
   const [showFullImage, setShowFullImage] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -79,7 +79,6 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
 
       // Notify parent about deletion
       onDelete?.()
-      onLogDeleted?.()
     } catch (error) {
       console.error('Error deleting log:', error)
       setIsRemoving(false)
@@ -104,15 +103,10 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
         )}
       >
         {log.images.length > 0 && (
-          <div>
-            <a
-              href={getOriginalImageUrl(log.images[0].storage_path)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
+          <div className="relative group/image">
+            <div 
+              className="cursor-pointer"
+              onClick={() => setShowFullLog(true)}
             >
               <img
                 src={getTransformedImageUrl(log.images[0].storage_path, {
@@ -122,13 +116,9 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
                   resize: 'cover'
                 })}
                 alt="Log attachment"
-                className="w-full h-[170px] object-cover hover:opacity-90 transition-opacity"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setShowFullImage(true);
-                }}
+                className="w-full h-[170px] object-cover"
               />
-            </a>
+            </div>
           </div>
         )}
         
@@ -163,16 +153,19 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
                 {formatLocalDateTime(new Date(log.created_at))}
               </span>
             </div>
-            {isTextOverflowing && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs bg-primary/10 text-primary border border-primary/20 transition-all hover:bg-primary/20 hover:border-primary/30 hover:shadow-[0_0_15px_hsla(var(--primary)/0.2)] hover-glow balance-adjust-button"
-                onClick={() => setShowFullLog(true)}
-              >
-                Read more
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "h-8 w-8 p-0 transition-colors hover:bg-transparent hover:shadow-none [&:hover]:shadow-none [&:hover]:bg-transparent",
+                log.is_favorite 
+                  ? "text-red-500 hover:text-muted-foreground/70" 
+                  : "text-muted-foreground hover:text-red-500"
+              )}
+              onClick={() => onToggleFavorite?.(!log.is_favorite)}
+            >
+              <Heart className={cn("h-4 w-4", log.is_favorite && "fill-current")} />
+            </Button>
           </div>
         </div>
       </div>
@@ -205,25 +198,51 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
           </DialogHeader>
           <div className="space-y-4">
             {log.images[0] && (
-              <img
-                src={getTransformedImageUrl(log.images[0].storage_path, { 
-                  width: 800,
-                  quality: 90,
-                  resize: 'contain'
-                })}
-                alt="Log attachment"
-                className="w-full rounded-lg"
-                onClick={() => {
-                  setShowFullLog(false)
-                  setShowFullImage(true)
-                }}
-              />
+              <div className="relative group/fullimage">
+                <img
+                  src={getTransformedImageUrl(log.images[0].storage_path, { 
+                    width: 800,
+                    quality: 90,
+                    resize: 'contain'
+                  })}
+                  alt="Log attachment"
+                  className="w-full rounded-lg"
+                  onClick={() => {
+                    setShowFullLog(false)
+                    setShowFullImage(true)
+                  }}
+                />
+                <div className="absolute inset-0 flex items-end justify-end p-2 opacity-0 group-hover/fullimage:opacity-100 transition-opacity">
+                  <a
+                    href={getOriginalImageUrl(log.images[0].storage_path)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-black/50 hover:bg-black/70 text-white text-sm px-3 py-1.5 rounded-md backdrop-blur-sm transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Open original in new tab
+                  </a>
+                </div>
+              </div>
             )}
             <div className="space-y-4">
               <p className="whitespace-pre-wrap">{log.text}</p>
-              <p className="text-sm text-muted-foreground">
-                {formatLocalDateTime(new Date(log.created_at))}
-              </p>
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>{formatLocalDateTime(new Date(log.created_at))}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "h-8 w-8 p-0 transition-colors hover:bg-transparent hover:shadow-none [&:hover]:shadow-none [&:hover]:bg-transparent",
+                    log.is_favorite 
+                      ? "text-red-500 hover:text-muted-foreground/70" 
+                      : "text-muted-foreground hover:text-red-500"
+                  )}
+                  onClick={() => onToggleFavorite?.(!log.is_favorite)}
+                >
+                  <Heart className={cn("h-4 w-4", log.is_favorite && "fill-current")} />
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
@@ -235,7 +254,7 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
             <DialogTitle>Image</DialogTitle>
           </DialogHeader>
           {log.images[0] && (
-            <>
+            <div className="relative group/fullimage">
               <img
                 src={getTransformedImageUrl(log.images[0].storage_path, { 
                   width: 1200,
@@ -245,17 +264,18 @@ export function CaptainLogCard({ log, onDelete, onLogDeleted }: CaptainLogCardPr
                 alt="Full size"
                 className="w-full max-h-[80vh] object-contain rounded-lg"
               />
-              <div className="mt-2 text-center">
+              <div className="absolute inset-0 flex items-end justify-end p-2 opacity-0 group-hover/fullimage:opacity-100 transition-opacity">
                 <a
                   href={getOriginalImageUrl(log.images[0].storage_path)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline text-sm"
+                  className="bg-black/50 hover:bg-black/70 text-white text-sm px-3 py-1.5 rounded-md backdrop-blur-sm transition-colors"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   Open original in new tab
                 </a>
               </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
