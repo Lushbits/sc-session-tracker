@@ -23,38 +23,58 @@ export function FeedbackDialog({
 
   // Check for success parameter in URL when component mounts or URL changes
   useEffect(() => {
-    console.log('URL Check:', {
-      search: window.location.search,
-      hash: window.location.hash,
-      pathname: window.location.pathname
-    })
-    
-    // Check both query params and hash fragment
-    const urlParams = new URLSearchParams(window.location.search)
-    const hashParams = new URLSearchParams(window.location.hash.replace('#', ''))
-    
-    console.log('Params Check:', {
-      urlParams: urlParams.get('feedback'),
-      hashParams: hashParams.get('feedback')
-    })
-    
-    if (urlParams.get('feedback') === 'success' || hashParams.get('feedback') === 'success') {
-      console.log('Success state detected!')
-      setIsSubmitted(true)
-      setFeedback('')
-      // Make sure dialog is open
-      onOpenChange(true)
-      // Remove the success parameter from URL without page refresh
-      const newUrl = window.location.pathname
-      window.history.replaceState({}, '', newUrl)
-      // Reset after 3 seconds
-      setTimeout(() => {
-        setIsSubmitted(false)
-        onOpenChange(false)
+    const checkForSuccess = () => {
+      // Get the full URL
+      const currentUrl = window.location.href
+      console.log('Checking URL:', currentUrl)
+      
+      // Check query parameters
+      const urlParams = new URLSearchParams(window.location.search)
+      const querySuccess = urlParams.get('feedback') === 'success'
+      
+      // Check hash parameters
+      const hashParams = new URLSearchParams(window.location.hash.replace('#', ''))
+      const hashSuccess = hashParams.get('feedback') === 'success'
+      
+      console.log('Success check:', {
+        querySuccess,
+        hashSuccess,
+        search: window.location.search,
+        hash: window.location.hash
+      })
+      
+      if (querySuccess || hashSuccess) {
+        console.log('Success state detected! Showing heart popup...')
+        setIsSubmitted(true)
+        setFeedback('')
         setIsSubmitting(false)
-      }, 3000)
+        // Make sure dialog is open
+        onOpenChange(true)
+        
+        // Clean up URL - try both pathname and origin+pathname
+        try {
+          const cleanUrl = window.location.pathname
+          window.history.replaceState({}, '', cleanUrl)
+        } catch (error) {
+          console.error('Failed to clean URL:', error)
+        }
+        
+        // Reset after 3 seconds
+        setTimeout(() => {
+          console.log('Resetting feedback dialog state...')
+          setIsSubmitted(false)
+          onOpenChange(false)
+        }, 3000)
+      }
     }
-  }, [onOpenChange, window.location.search, window.location.hash])
+
+    // Check immediately and also set up an interval to check periodically
+    checkForSuccess()
+    const interval = setInterval(checkForSuccess, 500)
+
+    // Cleanup interval on unmount
+    return () => clearInterval(interval)
+  }, [onOpenChange])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
