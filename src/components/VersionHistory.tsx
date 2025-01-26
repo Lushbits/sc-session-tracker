@@ -8,12 +8,23 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.3.6',
+    date: '2025-01-26',
+    changes: [
+      'Improved URL handling and navigation behavior across the application',
+      'Fixed "Active Session" indicator behavior in main menu',
+      'Updated application favicon with custom icon',
+      'Refactored session list view for better maintainability and performance'
+    ]
+  },
+  {
     version: '0.3.5',
     date: '2025-01-22',
     changes: [
       'Added the ability to favorite Captain\'s Logs and view only favorites',
     ]
-  },{
+  },
+  {
     version: '0.3.4',
     date: '2025-01-21',
     changes: [

@@ -1,36 +1,35 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from './contexts/AuthContext'
 import { useDatabase } from './hooks/useDatabase'
 import { Session } from './types'
 import { ThemeProvider } from './components/theme-provider'
 import { Button } from './components/ui/button'
 import SessionView from './components/SessionView'
-import SessionList from './components/SessionList'
-import { DeleteSessionDialog } from './components/DeleteSessionDialog'
+import { SessionList } from './components/session/SessionList'
 import { CaptainLogView } from './components/CaptainLogView'
 import { Footer } from './components/Footer'
 import { supabase } from './lib/supabase'
-import { useCaptainLogs } from './hooks/useCaptainLogs'
 import { FeedbackDialog } from './components/FeedbackDialog'
 import { LandingPage } from './components/LandingPage'
 import { CommunityLogView } from './components/CommunityLogView'
+import { ActiveSessionIndicator } from './components/ActiveSessionIndicator'
+import { Router, Route, Switch, useLocation, Link } from 'wouter'
+import { SessionDetailsDialog } from './components/SessionDetailsDialog'
 
 function App() {
   const [sessions, setSessions] = useState<Session[]>([])
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
-  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [view, setView] = useState<'sessions' | 'logs' | 'community'>('sessions')
   const [showFeedback, setShowFeedback] = useState(false)
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null)
+  const [showSessionDetails, setShowSessionDetails] = useState(false)
   const { user } = useAuth()
   const { fetchSessions, createSession, updateSession, deleteSession, addEvent } = useDatabase()
-  const { logs } = useCaptainLogs(sessionToDelete)
+  const [location, setLocation] = useLocation()
 
-  // Helper function to get active session
-  const getActiveSession = () => {
-    if (!activeSessionId) return null
-    return sessions.find(s => s.id === activeSessionId)
-  }
+  // Find active session without setting it
+  const activeSession = useMemo(() => {
+    return sessions.find(s => !s.endTime)
+  }, [sessions])
 
   useEffect(() => {
     if (user) {
@@ -42,11 +41,6 @@ function App() {
     try {
       const sessions = await fetchSessions()
       setSessions(sessions)
-      // Find any active session (no endTime)
-      const activeSession = sessions.find(s => !s.endTime)
-      if (activeSession) {
-        setActiveSessionId(activeSession.id)
-      }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to load sessions')
     }
@@ -60,7 +54,7 @@ function App() {
         initialBalance
       })
       await loadSessions()
-      setActiveSessionId(sessionId)
+      setLocation(`/sessions/${sessionId}`)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to create session')
     }
@@ -70,13 +64,16 @@ function App() {
     const session = sessions.find(s => s.id === sessionId)
     if (session) {
       try {
+        // End the session first
         await updateSession({
           ...session,
           endTime: new Date(),
           sessionLog
         })
+        // Then reload sessions
         await loadSessions()
-        setActiveSessionId(null)
+        // Finally navigate to sessions list
+        window.location.href = '/sessions'
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to end session')
       }
@@ -87,8 +84,8 @@ function App() {
     try {
       await deleteSession(sessionId)
       await loadSessions()
-      if (sessionId === activeSessionId) {
-        setActiveSessionId(null)
+      if (location.startsWith(`/sessions/${sessionId}`)) {
+        window.location.href = '/sessions'
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to delete session')
@@ -96,56 +93,44 @@ function App() {
     }
   }
 
-  const confirmDeleteSession = async () => {
-    if (sessionToDelete) {
-      try {
-        await deleteSession(sessionToDelete)
-        await loadSessions()
-        if (sessionToDelete === activeSessionId) {
-          setActiveSessionId(null)
-        }
-        setSessionToDelete(null)
-      } catch (error) {
-        setError(error instanceof Error ? error.message : 'Failed to delete session')
+  const handleViewSession = (sessionId: string) => {
+    const session = sessions.find(s => s.id === sessionId)
+    if (session) {
+      if (!session.endTime) {
+        // If it's an active session, navigate to the session view
+        setLocation(`/sessions/${sessionId}`)
+      } else {
+        // If it's a completed session, show the details dialog
+        setSelectedSession(session)
+        setShowSessionDetails(true)
       }
     }
   }
 
   const handleUpdateSession = async (updatedSession: Session) => {
     try {
-      // First update the session details
       await updateSession(updatedSession)
-
-      // Then check if we need to add a new event
       const existingSession = sessions.find(s => s.id === updatedSession.id)
       if (existingSession && updatedSession.events.length > existingSession.events.length) {
-        // Get the latest event that was added
         const latestEvent = updatedSession.events[updatedSession.events.length - 1]
-        // Add the event to the database
         await addEvent(updatedSession.id, latestEvent)
       }
-
-      // Finally reload the sessions to get the updated state
       await loadSessions()
     } catch (error) {
       console.error('Failed to update session:', error)
       setError(error instanceof Error ? error.message : 'Failed to update session')
-      throw error // Re-throw to propagate to the dialog
+      throw error
     }
   }
-
-  const activeSession = getActiveSession()
 
   const getLastCompletedSessionBalance = () => {
     const completedSessions = sessions.filter(s => s.endTime)
     if (completedSessions.length === 0) return undefined
     
-    // Sort by end time, newest first
     const sortedSessions = completedSessions.sort((a, b) => 
       new Date(b.endTime!).getTime() - new Date(a.endTime!).getTime()
     )
     
-    // Get the last balance from the most recent session
     const lastSession = sortedSessions[0]
     const sortedEvents = [...lastSession.events].sort((a, b) => 
       new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -164,106 +149,150 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark">
-      <div className="min-h-screen bg-background flex flex-col">
-        <header className="border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex h-14 items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="font-bold">SC Session Tracker</div>
-                <nav className="flex items-center space-x-4">
-                  <Button
-                    variant={view === 'sessions' ? 'default' : 'ghost'}
-                    className="h-9 hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => setView('sessions')}
+      <Router>
+        <div className="min-h-screen bg-background flex flex-col">
+          <header className="border-b">
+            <div className="container mx-auto px-4">
+              <div className="flex h-14 items-center justify-between">
+                <div className="flex items-center gap-6">
+                  <div className="font-bold">SC Session Tracker</div>
+                  <nav className="flex items-center space-x-4">
+                    {activeSession ? (
+                      <Link href={`/sessions/${activeSession.id}`}>
+                        <ActiveSessionIndicator 
+                          onClick={() => {}} 
+                          isActive={location === `/sessions/${activeSession.id}`}
+                        />
+                      </Link>
+                    ) : (
+                      <Link href="/sessions">
+                        <Button
+                          variant={location === '/sessions' ? 'default' : 'ghost'}
+                          className="h-9 hover:bg-accent hover:text-accent-foreground"
+                        >
+                          My sessions
+                        </Button>
+                      </Link>
+                    )}
+                    <Link href="/captains-log">
+                      <Button
+                        variant={location === '/captains-log' ? 'default' : 'ghost'}
+                        className="h-9 hover:bg-accent hover:text-accent-foreground"
+                      >
+                        Captain's log
+                      </Button>
+                    </Link>
+                    <Link href="/community">
+                      <Button
+                        variant={location === '/community' ? 'default' : 'ghost'}
+                        className="h-9 hover:bg-accent hover:text-accent-foreground"
+                      >
+                        Community logs
+                      </Button>
+                    </Link>
+                  </nav>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setShowFeedback(true)}
                   >
-                    My sessions
+                    Give Feedback
                   </Button>
-                  <Button
-                    variant={view === 'logs' ? 'default' : 'ghost'}
-                    className="h-9 hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => setView('logs')}
-                  >
-                    Captain's log
+                  <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>
+                    Sign Out
                   </Button>
-                  <Button
-                    variant={view === 'community' ? 'default' : 'ghost'}
-                    className="h-9 hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => setView('community')}
-                  >
-                    Community logs
-                  </Button>
-                </nav>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setShowFeedback(true)}
-                >
-                  Give Feedback
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>
-                  Sign Out
-                </Button>
-                {user?.user_metadata?.avatar_url && (
-                  <img
-                    src={user.user_metadata.avatar_url}
-                    alt="User avatar"
-                    className="h-8 w-8 rounded-full"
-                  />
-                )}
+                  {user?.user_metadata?.avatar_url && (
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt="User avatar"
+                      className="h-8 w-8 rounded-full"
+                    />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        <main className="flex-1">
-          {error && (
-            <div className="bg-destructive/15 text-destructive p-4">
-              <div className="container mx-auto">
-                {error}
+          <main className="flex-1">
+            {error && (
+              <div className="bg-destructive/15 text-destructive p-4">
+                <div className="container mx-auto">
+                  {error}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {view === 'sessions' ? (
-            activeSession ? (
-              <SessionView
-                session={activeSession}
-                onEndSession={handleEndSession}
-                onUpdateSession={handleUpdateSession}
-              />
-            ) : (
-              <SessionList
-                sessions={sessions}
-                onCreateSession={handleCreateSession}
-                onDeleteSession={handleDeleteSession}
-                lastCompletedSessionBalance={getLastCompletedSessionBalance()}
-              />
-            )
-          ) : view === 'logs' ? (
-            <CaptainLogView />
-          ) : (
-            <CommunityLogView />
-          )}
-        </main>
+            <Switch>
+              <Route path="/sessions/:id">
+                {(params) => {
+                  const session = sessions.find(s => s.id === params.id)
+                  return session ? (
+                    <SessionView
+                      session={session}
+                      onEndSession={handleEndSession}
+                      onUpdateSession={handleUpdateSession}
+                    />
+                  ) : null
+                }}
+              </Route>
+              <Route path="/sessions">
+                {() => {
+                  // If there's an active session, redirect to it
+                  if (activeSession) {
+                    setLocation(`/sessions/${activeSession.id}`)
+                    return null
+                  }
+                  
+                  return (
+                    <SessionList
+                      sessions={sessions}
+                      onCreateSession={handleCreateSession}
+                      onViewSession={handleViewSession}
+                      onDeleteSession={handleDeleteSession}
+                      lastCompletedSessionBalance={getLastCompletedSessionBalance()}
+                      hasActiveSession={!!activeSession}
+                    />
+                  )
+                }}
+              </Route>
+              <Route path="/captains-log">
+                <CaptainLogView />
+              </Route>
+              <Route path="/community">
+                <CommunityLogView />
+              </Route>
+              <Route path="/auth/callback">
+                {() => {
+                  setLocation('/sessions')
+                  return null
+                }}
+              </Route>
+              <Route path="/">
+                {() => {
+                  setLocation('/sessions')
+                  return null
+                }}
+              </Route>
+            </Switch>
+          </main>
 
-        <Footer />
+          <Footer />
 
-        <DeleteSessionDialog
-          sessionId={sessionToDelete}
-          isOpen={!!sessionToDelete}
-          onOpenChange={(open) => !open && setSessionToDelete(null)}
-          onConfirmDelete={confirmDeleteSession}
-          logCount={logs.length}
-        />
+          <SessionDetailsDialog
+            session={selectedSession}
+            isOpen={showSessionDetails}
+            onOpenChange={setShowSessionDetails}
+          />
 
-        <FeedbackDialog
-          isOpen={showFeedback}
-          onOpenChange={setShowFeedback}
-          version={import.meta.env.VITE_APP_VERSION || 'dev'}
-        />
-      </div>
+          <FeedbackDialog
+            isOpen={showFeedback}
+            onOpenChange={setShowFeedback}
+            version={import.meta.env.VITE_APP_VERSION || 'dev'}
+          />
+        </div>
+      </Router>
     </ThemeProvider>
   )
 }

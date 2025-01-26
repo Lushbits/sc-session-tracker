@@ -24,57 +24,30 @@ export function FeedbackDialog({
   // Check for success parameter in URL when component mounts or URL changes
   useEffect(() => {
     const checkForSuccess = () => {
-      // Get the full URL
-      const currentUrl = window.location.href
-      console.log('Checking URL:', currentUrl)
-      
-      // Check query parameters
       const urlParams = new URLSearchParams(window.location.search)
-      const querySuccess = urlParams.get('feedback') === 'success'
-      
-      // Check hash parameters
       const hashParams = new URLSearchParams(window.location.hash.replace('#', ''))
-      const hashSuccess = hashParams.get('feedback') === 'success'
       
-      console.log('Success check:', {
-        querySuccess,
-        hashSuccess,
-        search: window.location.search,
-        hash: window.location.hash
-      })
-      
-      if (querySuccess || hashSuccess) {
-        console.log('Success state detected! Showing heart popup...')
+      if (urlParams.get('feedback') === 'success' || hashParams.get('feedback') === 'success') {
         setIsSubmitted(true)
         setFeedback('')
         setIsSubmitting(false)
-        // Make sure dialog is open
         onOpenChange(true)
         
-        // Clean up URL - try both pathname and origin+pathname
-        try {
-          const cleanUrl = window.location.pathname
-          window.history.replaceState({}, '', cleanUrl)
-        } catch (error) {
-          console.error('Failed to clean URL:', error)
-        }
+        // Clean up URL
+        const cleanUrl = window.location.pathname
+        window.history.replaceState({}, '', cleanUrl)
         
         // Reset after 3 seconds
         setTimeout(() => {
-          console.log('Resetting feedback dialog state...')
           setIsSubmitted(false)
           onOpenChange(false)
         }, 3000)
       }
     }
 
-    // Check immediately and also set up an interval to check periodically
+    // Check only once when component mounts
     checkForSuccess()
-    const interval = setInterval(checkForSuccess, 500)
-
-    // Cleanup interval on unmount
-    return () => clearInterval(interval)
-  }, [onOpenChange])
+  }, [onOpenChange]) // Only depend on onOpenChange
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

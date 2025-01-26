@@ -39,13 +39,17 @@ export function EndSessionDialog({
     if (numBalance >= 0) {
       try {
         setError(null)
+        // First close the dialog
+        onOpenChange(false)
         // Create a balance event for the final balance
         await onAddEvent('balance', numBalance)
+        // End the session
         await onEndSession(sessionLog)
-        onOpenChange(false)
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to end session')
         console.error('Failed to end session:', error)
+        // Reopen the dialog if there's an error
+        onOpenChange(true)
       }
     }
   }

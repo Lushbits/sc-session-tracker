@@ -32,6 +32,8 @@ export function DeleteSessionDialog({
     try {
       setIsLoading(true)
       await onConfirmDelete()
+    } catch (error) {
+      console.error('Failed to delete session:', error)
     } finally {
       setIsLoading(false)
       onOpenChange(false)
