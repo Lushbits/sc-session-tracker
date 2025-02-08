@@ -1,8 +1,17 @@
 import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
-import { FriendRequest, Profile, FriendSystemState } from '@/types/friend-system'
+import { FriendRequest, Profile } from '@/types/friend-system'
 import { supabase } from '@/lib/supabase'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/types/supabase'
+
+export interface FriendSystemState {
+  friends: Profile[]
+  incomingRequests: FriendRequest[]
+  sentRequests: FriendRequest[]
+  setFriends: (friends: Profile[] | ((prev: Profile[]) => Profile[])) => void
+  setIncomingRequests: (requests: FriendRequest[] | ((prev: FriendRequest[]) => FriendRequest[])) => void
+  setSentRequests: (requests: FriendRequest[] | ((prev: FriendRequest[]) => FriendRequest[])) => void
+}
 
 type DatabaseFriendRow = {
   id: string

@@ -145,7 +145,7 @@ export class AuthService {
         .eq('username', username)
         .single()
 
-      if (usernameError && usernameError.code === 'PGRST116') {
+      if (usernameError && usernameError.code === 'PGRST116' || !existingUser) {
         break
       }
 
