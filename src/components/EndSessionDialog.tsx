@@ -116,7 +116,7 @@ export function EndSessionDialog({
             Cancel
           </Button>
           <Button 
-            variant="destructive"
+            variant="default"
             onClick={handleEndSession}
             disabled={numberUtils.parseDisplayNumber(finalBalance) < 0}
           >

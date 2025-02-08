@@ -18,5 +18,11 @@ export default defineConfig({
     hmr: {
       host: 'localhost'
     }
+  },
+  define: {
+    'process.env': {
+      VITE_SUPABASE_URL: JSON.stringify(process.env.VITE_SUPABASE_URL),
+      VITE_SUPABASE_ANON_KEY: JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY)
+    }
   }
 })

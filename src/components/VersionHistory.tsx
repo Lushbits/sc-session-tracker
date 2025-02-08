@@ -8,6 +8,19 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.4.0',
+    date: '2025-02-08',
+    changes: [
+      'Added comprehensive friend system with friend requests and real-time updates',
+      'Introduced Friend\'s Logs feature to view Captain\'s Logs from your friends',
+      'Added profile system with customizable display names and avatars',
+      'Implemented friend search with instant results',
+      'Added notification system for friend requests',
+      'Enhanced UI with friend filtering in logs view',
+      'Improved overall user experience with real-time friend status updates'
+    ]
+  },
+  {
     version: '0.3.6',
     date: '2025-01-26',
     changes: [

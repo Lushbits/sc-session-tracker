@@ -13,7 +13,7 @@
     --card: 207 27% 12%;
     --card-foreground: 210 40% 98%;
  
-    --popover: 222.2 84% 4.9%;
+    --popover: 240 17% 5%;
     --popover-foreground: 210 40% 98%;
  
     /* Primary colors and variants */
@@ -76,9 +76,13 @@
   }
   
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[hsl(var(--background))] text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  #root {
+    @apply min-h-screen bg-[hsl(var(--background))];
   }
 
   /* Landing page gradient background */
@@ -210,12 +214,12 @@ footer {
 }
 
 /* Input field styling */
-input {
+input:not([cmdk-input]) {
   border-color: hsl(var(--input)) !important;
   border-width: 1px !important;
 }
 
-input:focus {
+input:not([cmdk-input]):focus {
   border-color: hsl(var(--input)) !important;
   box-shadow: 0 0 0 1px hsl(var(--input) / 0.3) !important;
 }

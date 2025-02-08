@@ -99,15 +99,15 @@ export function CaptainLogCard({ log, onDelete, onToggleFavorite }: CaptainLogCa
         className={cn(
           "group rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 h-[320px] grid grid-rows-[auto_1fr_auto] overflow-hidden",
           isRemoving && "opacity-0 scale-95",
-          "hover:scale-[1.01] hover:border-primary hover:shadow-[0_0_15px_rgba(var(--primary-rgb)/0.15)]"
+          "hover:-translate-y-1 hover:shadow-[0_0_25px_hsl(var(--primary)/0.35)] hover:border-primary/70"
         )}
       >
-        {log.images.length > 0 && (
-          <div className="relative group/image">
-            <div 
-              className="cursor-pointer"
-              onClick={() => setShowFullLog(true)}
-            >
+        <div 
+          className="cursor-pointer contents"
+          onClick={() => setShowFullLog(true)}
+        >
+          {log.images.length > 0 && (
+            <div className="relative group/image">
               <img
                 src={getTransformedImageUrl(log.images[0].storage_path, {
                   width: 400,
@@ -119,17 +119,17 @@ export function CaptainLogCard({ log, onDelete, onToggleFavorite }: CaptainLogCa
                 className="w-full h-[170px] object-cover"
               />
             </div>
-          </div>
-        )}
-        
-        <div className="p-4 pb-0 overflow-hidden min-h-0">
-          <div className={cn(
-            "relative h-full",
-            isTextOverflowing && "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[var(--card-fade-height,3rem)] after:bg-gradient-to-t after:from-card after:to-transparent"
-          )}>
-            <p ref={textRef} className="whitespace-pre-wrap text-sm h-full">
-              {log.text}
-            </p>
+          )}
+          
+          <div className="p-4 pb-0 overflow-hidden min-h-0">
+            <div className={cn(
+              "relative h-full",
+              isTextOverflowing && "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[var(--card-fade-height,3rem)] after:bg-gradient-to-t after:from-card after:to-transparent"
+            )}>
+              <p ref={textRef} className="whitespace-pre-wrap text-sm h-full">
+                {log.text}
+              </p>
+            </div>
           </div>
         </div>
 

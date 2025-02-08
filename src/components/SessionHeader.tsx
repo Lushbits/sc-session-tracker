@@ -101,11 +101,10 @@ export function SessionHeader({
 
         {/* End session button */}
         <Button
-          variant="destructive"
-          size="icon"
+          variant="default"
           onClick={onEndSession}
         >
-          <XIcon className="h-4 w-4" />
+          End Session
         </Button>
       </div>
     </div>

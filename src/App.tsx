@@ -3,18 +3,29 @@ import { useAuth } from './contexts/AuthContext'
 import { useDatabase } from './hooks/useDatabase'
 import { Session } from './types'
 import { ThemeProvider } from './components/theme-provider'
-import { Button } from './components/ui/button'
 import SessionView from './components/SessionView'
 import { SessionList } from './components/session/SessionList'
 import { CaptainLogView } from './components/CaptainLogView'
 import { Footer } from './components/Footer'
-import { supabase } from './lib/supabase'
 import { FeedbackDialog } from './components/FeedbackDialog'
 import { LandingPage } from './components/LandingPage'
 import { CommunityLogView } from './components/CommunityLogView'
-import { ActiveSessionIndicator } from './components/ActiveSessionIndicator'
-import { Router, Route, Switch, useLocation, Link } from 'wouter'
+import { Router, Route, Switch, useLocation } from 'wouter'
 import { SessionDetailsDialog } from './components/SessionDetailsDialog'
+import { MainHeader } from './components/MainHeader'
+import { FriendProvider } from './contexts/FriendContext'
+import { Loader2 } from 'lucide-react'
+import { FriendsPage } from './pages/friends'
+import { FriendLogsGrid } from './components/friend-logs/friend-logs-grid'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+function Redirect({ to }: { to: string }) {
+  const [_, setLocation] = useLocation();
+  useEffect(() => {
+    setLocation(to);
+  }, [to, setLocation]);
+  return null;
+}
 
 function App() {
   const [sessions, setSessions] = useState<Session[]>([])
@@ -22,20 +33,28 @@ function App() {
   const [showFeedback, setShowFeedback] = useState(false)
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
   const [showSessionDetails, setShowSessionDetails] = useState(false)
-  const { user } = useAuth()
+  const { loading, isAuthenticated } = useAuth()
   const { fetchSessions, createSession, updateSession, deleteSession, addEvent } = useDatabase()
   const [location, setLocation] = useLocation()
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000,
+        refetchOnWindowFocus: false,
+      },
+    },
+  }))
 
   // Find active session without setting it
   const activeSession = useMemo(() => {
-    return sessions.find(s => !s.endTime)
+    return sessions.find(s => !s.endTime) || null
   }, [sessions])
 
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       loadSessions()
     }
-  }, [user])
+  }, [isAuthenticated])
 
   const loadSessions = async () => {
     try {
@@ -139,7 +158,17 @@ function App() {
     return sortedEvents[sortedEvents.length - 1]?.amount ?? lastSession.initialBalance
   }
 
-  if (!user) {
+  if (loading) {
+    return (
+      <ThemeProvider defaultTheme="dark">
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </ThemeProvider>
+    )
+  }
+
+  if (!isAuthenticated) {
     return (
       <ThemeProvider defaultTheme="dark">
         <LandingPage />
@@ -148,152 +177,96 @@ function App() {
   }
 
   return (
-    <ThemeProvider defaultTheme="dark">
-      <Router>
-        <div className="min-h-screen bg-background flex flex-col">
-          <header className="border-b">
-            <div className="container mx-auto px-4">
-              <div className="flex h-14 items-center justify-between">
-                <div className="flex items-center gap-6">
-                  <div className="font-bold">SC Session Tracker</div>
-                  <nav className="flex items-center space-x-4">
-                    {activeSession ? (
-                      <Link href={`/sessions/${activeSession.id}`}>
-                        <ActiveSessionIndicator 
-                          onClick={() => {}} 
-                          isActive={location === `/sessions/${activeSession.id}`}
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark">
+        <FriendProvider>
+          <Router>
+            <div className="min-h-screen bg-background flex flex-col">
+              <MainHeader
+                activeSession={activeSession}
+                onShowFeedback={() => setShowFeedback(true)}
+              />
+
+              <main className="flex-1">
+                {error && (
+                  <div className="bg-destructive/15 text-destructive p-4">
+                    <div className="container mx-auto">
+                      {error}
+                    </div>
+                  </div>
+                )}
+
+                <Switch>
+                  <Route path="/sessions/:id">
+                    {(params) => {
+                      const session = sessions.find(s => s.id === params.id)
+                      return session ? (
+                        <SessionView
+                          session={session}
+                          onEndSession={handleEndSession}
+                          onUpdateSession={handleUpdateSession}
                         />
-                      </Link>
-                    ) : (
-                      <Link href="/sessions">
-                        <Button
-                          variant={location === '/sessions' ? 'default' : 'ghost'}
-                          className="h-9 hover:bg-accent hover:text-accent-foreground"
-                        >
-                          My sessions
-                        </Button>
-                      </Link>
-                    )}
-                    <Link href="/captains-log">
-                      <Button
-                        variant={location === '/captains-log' ? 'default' : 'ghost'}
-                        className="h-9 hover:bg-accent hover:text-accent-foreground"
-                      >
-                        Captain's log
-                      </Button>
-                    </Link>
-                    <Link href="/community">
-                      <Button
-                        variant={location === '/community' ? 'default' : 'ghost'}
-                        className="h-9 hover:bg-accent hover:text-accent-foreground"
-                      >
-                        Community logs
-                      </Button>
-                    </Link>
-                  </nav>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setShowFeedback(true)}
-                  >
-                    Give Feedback
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>
-                    Sign Out
-                  </Button>
-                  {user?.user_metadata?.avatar_url && (
-                    <img
-                      src={user.user_metadata.avatar_url}
-                      alt="User avatar"
-                      className="h-8 w-8 rounded-full"
-                    />
-                  )}
-                </div>
-              </div>
+                      ) : null
+                    }}
+                  </Route>
+                  <Route path="/sessions">
+                    {() => {
+                      // If there's an active session, redirect to it
+                      if (activeSession) {
+                        return <Redirect to={`/sessions/${activeSession.id}`} />;
+                      }
+                      
+                      return (
+                        <SessionList
+                          sessions={sessions}
+                          onCreateSession={handleCreateSession}
+                          onViewSession={handleViewSession}
+                          onDeleteSession={handleDeleteSession}
+                          lastCompletedSessionBalance={getLastCompletedSessionBalance()}
+                          hasActiveSession={!!activeSession}
+                        />
+                      )
+                    }}
+                  </Route>
+                  <Route path="/captains-log">
+                    <CaptainLogView />
+                  </Route>
+                  <Route path="/community">
+                    <CommunityLogView />
+                  </Route>
+                  <Route path="/friends">
+                    <FriendsPage />
+                  </Route>
+                  <Route path="/friends-logs">
+                    <FriendLogsGrid />
+                  </Route>
+                  <Route path="/auth/callback">
+                    {() => <Redirect to="/sessions" />}
+                  </Route>
+                  <Route path="/">
+                    {() => <Redirect to="/sessions" />}
+                  </Route>
+                </Switch>
+              </main>
+
+              <Footer />
+
+              <SessionDetailsDialog
+                session={selectedSession}
+                isOpen={showSessionDetails}
+                onOpenChange={setShowSessionDetails}
+              />
+
+              <FeedbackDialog
+                isOpen={showFeedback}
+                onOpenChange={setShowFeedback}
+                version={import.meta.env.VITE_APP_VERSION || 'dev'}
+              />
             </div>
-          </header>
-
-          <main className="flex-1">
-            {error && (
-              <div className="bg-destructive/15 text-destructive p-4">
-                <div className="container mx-auto">
-                  {error}
-                </div>
-              </div>
-            )}
-
-            <Switch>
-              <Route path="/sessions/:id">
-                {(params) => {
-                  const session = sessions.find(s => s.id === params.id)
-                  return session ? (
-                    <SessionView
-                      session={session}
-                      onEndSession={handleEndSession}
-                      onUpdateSession={handleUpdateSession}
-                    />
-                  ) : null
-                }}
-              </Route>
-              <Route path="/sessions">
-                {() => {
-                  // If there's an active session, redirect to it
-                  if (activeSession) {
-                    setLocation(`/sessions/${activeSession.id}`)
-                    return null
-                  }
-                  
-                  return (
-                    <SessionList
-                      sessions={sessions}
-                      onCreateSession={handleCreateSession}
-                      onViewSession={handleViewSession}
-                      onDeleteSession={handleDeleteSession}
-                      lastCompletedSessionBalance={getLastCompletedSessionBalance()}
-                      hasActiveSession={!!activeSession}
-                    />
-                  )
-                }}
-              </Route>
-              <Route path="/captains-log">
-                <CaptainLogView />
-              </Route>
-              <Route path="/community">
-                <CommunityLogView />
-              </Route>
-              <Route path="/auth/callback">
-                {() => {
-                  setLocation('/sessions')
-                  return null
-                }}
-              </Route>
-              <Route path="/">
-                {() => {
-                  setLocation('/sessions')
-                  return null
-                }}
-              </Route>
-            </Switch>
-          </main>
-
-          <Footer />
-
-          <SessionDetailsDialog
-            session={selectedSession}
-            isOpen={showSessionDetails}
-            onOpenChange={setShowSessionDetails}
-          />
-
-          <FeedbackDialog
-            isOpen={showFeedback}
-            onOpenChange={setShowFeedback}
-            version={import.meta.env.VITE_APP_VERSION || 'dev'}
-          />
-        </div>
-      </Router>
-    </ThemeProvider>
+          </Router>
+        </FriendProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   )
 }
 

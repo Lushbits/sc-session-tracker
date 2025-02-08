@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { LoginForm } from './auth/LoginForm'
-import { Footer } from './Footer'
-import { Dialog, DialogContent } from './ui/dialog'
 import { Heart } from 'lucide-react'
+import { Dialog, DialogContent } from './ui/dialog'
+import { Footer } from './Footer'
+import { LoginForm } from './auth/LoginForm'
 import newSessionView from '../assets/images/new-sessionview.png'
 import newUpdateBalance from '../assets/images/new-updatebalance.png'
 import newCaptLog from '../assets/images/new-captlog.png'
@@ -11,29 +11,29 @@ export function LandingPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   return (
-    <div className="min-h-screen landing-page flex flex-col bg-background">
+    <div className="min-h-screen bg-background landing-page flex flex-col">
       <main className="flex-1 flex flex-col items-center justify-center py-16">
         <div className="w-full max-w-6xl space-y-16">
           {/* Hero Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center px-4">
             <div className="space-y-6">
               <h1 className="text-4xl font-bold">
-                <span>SC Session Tracker</span>
+                SC Session Tracker
               </h1>
               <p className="text-xl text-muted-foreground">
                 Maximize Your <a
-              href="https://play.sc"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              Star Citizen
-            </a> gaming sessions. Track your earnings, spend, and profits, all while documenting your adventures across the stars in your very own Captain's Log.
+                  href="https://robertsspaceindustries.com/play-star-citizen"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Star Citizen
+                </a> gaming sessions. Track your earnings, spend, and profits, all while documenting your adventures across the stars in your very own Captain's Log.
               </p>
             </div>
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <p className="text-lg text-muted-foreground mb-2">Ready to get started?</p>
-              <div className="w-full max-w-md">
+            <div className="flex flex-col items-center justify-center">
+              <div className="w-full max-w-sm">
+                <p className="text-lg text-muted-foreground mb-4 text-center">Ready to get started?</p>
                 <LoginForm />
               </div>
             </div>
@@ -98,7 +98,7 @@ export function LandingPage() {
           <div className="text-center text-muted-foreground text-sm px-4">
             Made with <Heart className="inline-block w-4 h-4 mx-1 text-red-500 fill-red-500" /> by the{' '}
             <a
-              href="https://play.sc"
+              href="https://robertsspaceindustries.com/play-star-citizen"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"

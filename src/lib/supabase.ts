@@ -18,19 +18,28 @@ export type Database = {
           id: string
           user_id: string
           username: string
+          display_name: string | null
+          avatar_url: string | null
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
           username: string
+          display_name?: string | null
+          avatar_url?: string | null
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           user_id?: string
           username?: string
+          display_name?: string | null
+          avatar_url?: string | null
           created_at?: string
+          updated_at?: string
         }
       }
       sessions: {
@@ -140,6 +149,52 @@ export type Database = {
           log_id?: string
           user_id?: string
           storage_path?: string
+          created_at?: string
+        }
+      }
+      friend_requests: {
+        Row: {
+          id: string
+          sender_id: string
+          receiver_id: string
+          status: 'pending' | 'accepted' | 'rejected'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          sender_id: string
+          receiver_id: string
+          status?: 'pending' | 'accepted' | 'rejected'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          sender_id?: string
+          receiver_id?: string
+          status?: 'pending' | 'accepted' | 'rejected'
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      friends: {
+        Row: {
+          id: string
+          user_id: string
+          friend_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          friend_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          friend_id?: string
           created_at?: string
         }
       }
