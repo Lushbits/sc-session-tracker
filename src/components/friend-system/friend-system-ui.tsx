@@ -1,7 +1,6 @@
 import { FriendSearch } from './friend-search'
 import { FriendsList } from './friends-list'
 import { FriendRequests } from './friend-requests'
-import { ProfileDialog } from './profile-dialog'
 import { Button } from '@/components/ui/button'
 import { UserPlus } from 'lucide-react'
 import {

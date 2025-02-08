@@ -1,11 +1,9 @@
-import { Profile, FriendRequest, DatabaseFriendRequest } from '@/types/friend-system'
+import { Profile } from '@/types/friend-system'
+
+export const getLoadingKey = (operation: string, id: string) => `${operation}-${id}`
 
 export const mapProfile = (profile: Profile | null): Profile | null => {
   if (!profile) return null
-  if (!profile.display_name) {
-    console.error('Profile missing required display_name:', profile)
-    return null
-  }
   return {
     id: profile.id,
     user_id: profile.user_id,
@@ -33,8 +31,4 @@ export const mapRequestWithProfiles = (request: DatabaseFriendRequest): FriendRe
     sender: request.sender ? mapProfile(request.sender) ?? undefined : undefined,
     receiver: request.receiver ? mapProfile(request.receiver) ?? undefined : undefined
   }
-}
-
-export const getLoadingKey = (operation: string, id: string): string => {
-  return `${operation}-${id}`
 } 

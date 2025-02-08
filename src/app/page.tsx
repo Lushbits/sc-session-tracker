@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button'
 import { LoginForm } from '@/components/auth/LoginForm'
 
 export default function Page() {

@@ -1,9 +1,7 @@
 import { Database } from '@/types/supabase'
 import { FriendRequest, Profile } from '@/types/friend-system'
-import { mapProfile } from './friend-system-helpers'
 import { supabase } from '@/lib/supabase'
 
-type DatabaseProfile = Database['public']['Tables']['profiles']['Row']
 type SupabaseProfile = {
   id: string
   user_id: string

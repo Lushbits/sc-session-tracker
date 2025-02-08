@@ -191,14 +191,13 @@ export const setupFriendRequestSubscription = (
 export const setupFriendSystemRealtime = (
   supabase: SupabaseClient<Database>,
   userId: string,
-  state: FriendSystemState,
-  setState: (state: FriendSystemState) => void
+  state: FriendSystemState
 ) => {
-  const handleFriendRequestChange = async (payload: RealtimePostgresChangesPayload<DatabaseFriendRequestRow>) => {
+  const handleFriendRequestChange = async () => {
     await syncFriendData(state, userId)
   }
 
-  const handleFriendChange = async (payload: RealtimePostgresChangesPayload<DatabaseFriendRow>) => {
+  const handleFriendChange = async () => {
     await syncFriendData(state, userId)
   }
 

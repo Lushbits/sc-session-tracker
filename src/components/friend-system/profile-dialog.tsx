@@ -6,12 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose
 } from '@/components/ui/dialog'
 import { ProfileSettings } from './profile-settings'
-import { X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 interface ProfileDialogProps {
   trigger: React.ReactNode
