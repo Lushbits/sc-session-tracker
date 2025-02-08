@@ -1,4 +1,3 @@
-import { Database } from '@/types/supabase'
 import { FriendRequest, Profile } from '@/types/friend-system'
 import { supabase } from '@/lib/supabase'
 
