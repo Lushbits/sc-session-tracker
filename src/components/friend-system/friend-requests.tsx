@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Check, X, Loader2 } from 'lucide-react'
 import { useFriends } from '@/contexts/FriendContext'
+import { FriendRequest } from '@/types/friend-system'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {

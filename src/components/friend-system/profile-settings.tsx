@@ -9,6 +9,8 @@ import { Loader2, CheckCircle2, XCircle, Trash2 } from 'lucide-react'
 import { ImageCropDialog } from './image-crop-dialog'
 import { cn } from '@/lib/utils'
 import filter from 'leo-profanity'
+import { Area } from 'react-easy-crop'
+import { getCroppedImg } from '@/utils/image-crop'
 
 interface ProfileData {
   username: string
@@ -89,19 +91,36 @@ export function ProfileSettings({ onClose }: ProfileSettingsProps) {
     }
   }
 
-  const handleCropComplete = async (croppedImageUrl: string) => {
-    // Convert base64 to blob
-    const response = await fetch(croppedImageUrl)
-    const blob = await response.blob()
+  const handleCropComplete = async (croppedAreaPixels: Area) => {
+    if (!selectedFile) return
     
-    // Create a File from the blob
-    const file = new File([blob], selectedFile?.name || 'profile-picture.jpg', {
-      type: 'image/jpeg'
-    })
-    
-    setAvatarFile(file)
-    setPreviewUrl(croppedImageUrl)
-    setShowCropDialog(false)
+    try {
+      // Get the cropped image as base64 string
+      const croppedImageUrl = await getCroppedImg(
+        URL.createObjectURL(selectedFile),
+        croppedAreaPixels
+      )
+      
+      // Convert base64 to blob
+      const response = await fetch(croppedImageUrl)
+      const blob = await response.blob()
+      
+      // Create a File from the blob
+      const file = new File([blob], selectedFile.name || 'profile-picture.jpg', {
+        type: 'image/jpeg'
+      })
+      
+      setAvatarFile(file)
+      setPreviewUrl(croppedImageUrl)
+      setShowCropDialog(false)
+    } catch (error) {
+      console.error('Error cropping image:', error)
+      toast({
+        title: "Error",
+        description: "Failed to crop image. Please try again.",
+        variant: "destructive"
+      })
+    }
   }
 
   const checkDisplayNameAvailability = async (name: string): Promise<boolean> => {

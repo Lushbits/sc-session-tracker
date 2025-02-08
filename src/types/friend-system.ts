@@ -1,54 +1,44 @@
-export type Profile = {
+export interface Profile {
   id: string
   user_id: string
-  username?: string
+  username: string
   display_name: string
   avatar_url: string | null
   created_at: string
   updated_at: string
 }
 
+export type FriendRequestStatus = 'pending' | 'accepted' | 'rejected'
+
 export interface FriendRequestBase {
   id: string
   sender_id: string
   receiver_id: string
-  status: 'pending' | 'accepted' | 'rejected'
-}
-
-export type FriendRequest = {
-  id: string
-  sender_id: string
-  receiver_id: string
-  status: 'pending' | 'accepted' | 'rejected'
+  status: FriendRequestStatus
   created_at: string
   updated_at: string
-  sender?: Profile
-  receiver?: Profile
+}
+
+export interface FriendRequest extends FriendRequestBase {
+  sender: Profile
+  receiver: Profile
 }
 
 export interface FriendRecord {
   id: string
   user_id: string
   friend_id: string
-  friend: Profile
-}
-
-export interface DatabaseFriendRecord {
-  id: string
-  user_id: string
-  friend_id: string
-  friend: Profile
-}
-
-export interface DatabaseFriendRequest {
-  id: string
-  sender_id: string
-  receiver_id: string
-  status: 'pending' | 'accepted' | 'rejected'
   created_at: string
-  updated_at: string
-  sender?: Profile
-  receiver?: Profile
+  friend: Profile
+}
+
+export interface FriendSystemState {
+  friends: Profile[]
+  incomingRequests: FriendRequest[]
+  sentRequests: FriendRequest[]
+  setFriends: (friends: Profile[] | ((prev: Profile[]) => Profile[])) => void
+  setIncomingRequests: (requests: FriendRequest[] | ((prev: FriendRequest[]) => FriendRequest[])) => void
+  setSentRequests: (requests: FriendRequest[] | ((prev: FriendRequest[]) => FriendRequest[])) => void
 }
 
 export interface FriendContextState {
@@ -68,4 +58,9 @@ export interface FriendContextType extends FriendContextState {
   cancelFriendRequest: (requestId: string) => Promise<void>
   removeFriend: (friendId: string) => Promise<void>
   getLoadingState: (operation: string, id: string) => boolean
+}
+
+export interface SearchResultProfile extends Profile {
+  hasPendingRequest: boolean
+  hasIncomingRequest: boolean
 } 

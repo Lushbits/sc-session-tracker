@@ -1,128 +1,100 @@
-import { useState, useRef, useEffect } from 'react'
-import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop, convertToPixelCrop } from 'react-image-crop'
-import 'react-image-crop/dist/ReactCrop.css'
+import { useCallback, useState } from "react"
+import Cropper from "react-easy-crop"
+import { Area } from "react-easy-crop"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Slider } from "@/components/ui/slider"
 
 interface ImageCropDialogProps {
+  imageUrl: string
   open: boolean
   onClose: () => void
-  imageUrl: string
-  onCropComplete: (croppedImageUrl: string) => void
+  onCropComplete: (croppedAreaPixels: Area) => void
+  aspectRatio?: number
+  cropShape?: "rect" | "round"
 }
 
-function centerAspectCrop(
-  mediaWidth: number,
-  mediaHeight: number,
-  aspect: number,
-) {
-  return centerCrop(
-    makeAspectCrop(
-      {
-        unit: '%',
-        width: 90,
-      },
-      aspect,
-      mediaWidth,
-      mediaHeight,
-    ),
-    mediaWidth,
-    mediaHeight,
+export function ImageCropDialog({
+  imageUrl,
+  open,
+  onClose,
+  onCropComplete,
+  aspectRatio = 1,
+  cropShape = "round"
+}: ImageCropDialogProps) {
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
+
+  const handleCropComplete = useCallback(
+    (_croppedArea: Area, croppedAreaPixels: Area) => {
+      setCroppedAreaPixels(croppedAreaPixels)
+    },
+    []
   )
-}
 
-export function ImageCropDialog({ open, onClose, imageUrl, onCropComplete }: ImageCropDialogProps) {
-  const [crop, setCrop] = useState<Crop>()
-  const [imgDimensions, setImgDimensions] = useState({ width: 0, height: 0 })
-  const imageRef = useRef<HTMLImageElement>(null)
-
-  useEffect(() => {
-    const image = new Image()
-    image.src = imageUrl
-    image.onload = () => {
-      const { naturalWidth: width, naturalHeight: height } = image
-      setImgDimensions({ width, height })
-      setCrop(centerAspectCrop(width, height, 1))
-    }
-  }, [imageUrl])
-
-  const getCroppedImg = (image: HTMLImageElement, percentCrop: Crop) => {
-    const canvas = document.createElement('canvas')
-    
-    // Convert percentage crop to pixel values
-    const pixelCrop = convertToPixelCrop(
-      percentCrop,
-      image.naturalWidth,
-      image.naturalHeight
-    )
-
-    // Set canvas size to the cropped image size
-    canvas.width = pixelCrop.width
-    canvas.height = pixelCrop.height
-
-    const ctx = canvas.getContext('2d')
-    if (!ctx) {
-      throw new Error('No 2d context')
-    }
-
-    // Draw the cropped image
-    ctx.drawImage(
-      image,
-      pixelCrop.x,
-      pixelCrop.y,
-      pixelCrop.width,
-      pixelCrop.height,
-      0,
-      0,
-      pixelCrop.width,
-      pixelCrop.height
-    )
-
-    return canvas.toDataURL('image/jpeg', 0.9)
-  }
-
-  const handleComplete = () => {
-    if (imageRef.current && crop?.width && crop?.height) {
-      const croppedImageUrl = getCroppedImg(imageRef.current, crop)
-      onCropComplete(croppedImageUrl)
+  const handleSave = () => {
+    if (croppedAreaPixels) {
+      onCropComplete(croppedAreaPixels)
       onClose()
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[675px]">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Adjust Profile Picture</DialogTitle>
+          <DialogTitle>Crop Image</DialogTitle>
+          <DialogDescription>
+            Adjust the crop area to select your profile picture
+          </DialogDescription>
         </DialogHeader>
-        <div className="mt-4">
-          {!!crop && (
-            <ReactCrop
-              crop={crop}
-              onChange={(_, percentCrop) => setCrop(percentCrop)}
-              aspect={1}
-              circularCrop
-              className="max-h-[500px] rounded-lg"
-            >
-              <img
-                ref={imageRef}
-                src={imageUrl}
-                alt="Crop me"
-                className="max-h-[500px] w-auto"
-                style={{ maxHeight: '500px', width: 'auto' }}
-              />
-            </ReactCrop>
-          )}
+        <div className="relative aspect-square w-full overflow-hidden rounded-lg">
+          <Cropper
+            image={imageUrl}
+            crop={crop}
+            zoom={zoom}
+            aspect={aspectRatio}
+            onCropChange={setCrop}
+            onCropComplete={handleCropComplete}
+            onZoomChange={setZoom}
+            cropShape={cropShape}
+            showGrid={false}
+            style={{
+              containerStyle: {
+                width: "100%",
+                height: "100%",
+                backgroundColor: "black"
+              }
+            }}
+          />
         </div>
-        <div className="mt-4 flex justify-end space-x-2">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleComplete}>Save</Button>
+        <div className="py-4">
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">Zoom</span>
+            <Slider
+              value={[zoom]}
+              min={1}
+              max={3}
+              step={0.1}
+              onValueChange={(values: number[]) => setZoom(values[0])}
+              className="flex-1"
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={!croppedAreaPixels}>
+            Save
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

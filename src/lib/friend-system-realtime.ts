@@ -1,18 +1,78 @@
 import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
-import { FriendRequest, Profile, DatabaseFriendRecord, DatabaseFriendRequest } from '@/types/friend-system'
-import { mapRequestWithProfiles, mapProfile } from './friend-system-helpers'
+import { FriendRequest, Profile, FriendSystemState } from '@/types/friend-system'
 import { supabase } from '@/lib/supabase'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/types/supabase'
 
-// Export the type
-export interface FriendSystemState {
-  friends: Profile[]
-  incomingRequests: FriendRequest[]
-  sentRequests: FriendRequest[]
-  setFriends: (friends: Profile[] | ((prev: Profile[]) => Profile[])) => void
-  setIncomingRequests: (requests: FriendRequest[] | ((prev: FriendRequest[]) => FriendRequest[])) => void
-  setSentRequests: (requests: FriendRequest[] | ((prev: FriendRequest[]) => FriendRequest[])) => void
+type DatabaseFriendRow = {
+  id: string
+  user_id: string
+  friend_id: string
+  created_at: string
+  friend: {
+    id: string
+    user_id: string
+    username: string
+    display_name: string
+    avatar_url: string | null
+    created_at: string
+    updated_at: string
+  }
+}
+
+type DatabaseFriendRequestRow = {
+  id: string
+  sender_id: string
+  receiver_id: string
+  status: 'pending' | 'accepted' | 'rejected'
+  created_at: string
+  updated_at: string
+  sender: {
+    id: string
+    user_id: string
+    username: string
+    display_name: string
+    avatar_url: string | null
+    created_at: string
+    updated_at: string
+  }
+  receiver: {
+    id: string
+    user_id: string
+    username: string
+    display_name: string
+    avatar_url: string | null
+    created_at: string
+    updated_at: string
+  }
+}
+
+function isValidProfile(profile: any): profile is Profile {
+  return (
+    profile &&
+    typeof profile === 'object' &&
+    'id' in profile &&
+    'user_id' in profile &&
+    'username' in profile &&
+    'display_name' in profile &&
+    'created_at' in profile &&
+    'updated_at' in profile
+  )
+}
+
+function mapDatabaseRequestToFriendRequest(request: DatabaseFriendRequestRow): FriendRequest | null {
+  if (!request.sender || !request.receiver) return null
+  
+  return {
+    id: request.id,
+    sender_id: request.sender_id,
+    receiver_id: request.receiver_id,
+    status: request.status,
+    created_at: request.created_at,
+    updated_at: request.updated_at,
+    sender: request.sender as Profile,
+    receiver: request.receiver as Profile
+  }
 }
 
 const syncFriendData = async (state: FriendSystemState, userId: string) => {
@@ -20,19 +80,48 @@ const syncFriendData = async (state: FriendSystemState, userId: string) => {
     const [friendsData, requestsData] = await Promise.all([
       supabase
         .from('friends')
-        .select(`
+        .select<string, DatabaseFriendRow>(`
           id,
           user_id,
           friend_id,
-          friend:profiles!friend_id(*)
+          friend:profiles!friend_id(
+            id,
+            user_id,
+            username,
+            display_name,
+            avatar_url,
+            created_at,
+            updated_at
+          )
         `)
         .eq('user_id', userId),
       supabase
         .from('friend_requests')
-        .select(`
-          *,
-          sender:profiles!sender_id(*),
-          receiver:profiles!receiver_id(*)
+        .select<string, DatabaseFriendRequestRow>(`
+          id,
+          sender_id,
+          receiver_id,
+          status,
+          created_at,
+          updated_at,
+          sender:profiles!sender_id(
+            id,
+            user_id,
+            username,
+            display_name,
+            avatar_url,
+            created_at,
+            updated_at
+          ),
+          receiver:profiles!receiver_id(
+            id,
+            user_id,
+            username,
+            display_name,
+            avatar_url,
+            created_at,
+            updated_at
+          )
         `)
         .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
     ])
@@ -42,27 +131,14 @@ const syncFriendData = async (state: FriendSystemState, userId: string) => {
 
     // Update friends
     const mappedFriends = friendsData.data
-      .map(record => mapProfile(record.friend))
-      .filter((profile): profile is Profile => profile !== null)
+      .map(record => record.friend)
+      .filter(isValidProfile)
     state.setFriends(mappedFriends)
 
     // Split and update requests
-    const mappedRequests = requestsData.data.map(request => {
-      const sender = mapProfile(request.sender)
-      const receiver = mapProfile(request.receiver)
-      if (!sender || !receiver) return null
-      
-      return {
-        id: request.id,
-        sender_id: request.sender_id,
-        receiver_id: request.receiver_id,
-        status: request.status,
-        created_at: request.created_at,
-        updated_at: request.updated_at,
-        sender,
-        receiver
-      }
-    }).filter((request): request is FriendRequest => request !== null)
+    const mappedRequests = requestsData.data
+      .map(request => mapDatabaseRequestToFriendRequest(request))
+      .filter((request): request is FriendRequest => request !== null)
 
     const pending = mappedRequests.filter(r => r.status === 'pending' && r.receiver_id === userId)
     const sent = mappedRequests.filter(r => r.status === 'pending' && r.sender_id === userId)
@@ -118,90 +194,12 @@ export const setupFriendSystemRealtime = (
   state: FriendSystemState,
   setState: (state: FriendSystemState) => void
 ) => {
-  const handleFriendRequestChange = async (payload: RealtimePostgresChangesPayload<FriendRequestRow>) => {
-    try {
-      // Re-fetch all friend requests to ensure we have the latest state
-      const { data: requests, error } = await supabase
-        .from('friend_requests')
-        .select(`
-          id,
-          sender_id,
-          receiver_id,
-          status,
-          created_at,
-          updated_at,
-          sender:profiles!sender_id(
-            id,
-            user_id,
-            display_name,
-            avatar_url,
-            created_at,
-            updated_at
-          ),
-          receiver:profiles!receiver_id(
-            id,
-            user_id,
-            display_name,
-            avatar_url,
-            created_at,
-            updated_at
-          )
-        `)
-        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
-
-      if (error) throw error
-
-      // Map the requests to our internal type
-      const mappedRequests = requests.map(mapRequestWithProfiles)
-
-      // Update state with new requests
-      setState({
-        ...state,
-        pendingRequests: mappedRequests.filter(r => r.receiver_id === userId && r.status === 'pending'),
-        sentRequests: mappedRequests.filter(r => r.sender_id === userId && r.status === 'pending')
-      })
-    } catch (error) {
-      console.error('Error syncing friend data:', error)
-    }
+  const handleFriendRequestChange = async (payload: RealtimePostgresChangesPayload<DatabaseFriendRequestRow>) => {
+    await syncFriendData(state, userId)
   }
 
-  const handleFriendChange = async (payload: RealtimePostgresChangesPayload<FriendRow>) => {
-    try {
-      // Re-fetch all friends to ensure we have the latest state
-      const { data, error } = await supabase
-        .from('friends')
-        .select(`
-          id,
-          user_id,
-          friend_id,
-          friend:profiles!friend_id(
-            id,
-            user_id,
-            display_name,
-            avatar_url,
-            created_at,
-            updated_at
-          )
-        `)
-        .eq('user_id', userId)
-
-      if (error) throw error
-
-      if (!data) return
-
-      // Map the friends to our internal type
-      const updatedFriends = data
-        .map(record => mapProfile(record.friend))
-        .filter((friend): friend is Profile => friend !== null)
-
-      // Update state with new friends
-      setState({
-        ...state,
-        friends: updatedFriends
-      })
-    } catch (error) {
-      console.error('Error syncing friend data:', error)
-    }
+  const handleFriendChange = async (payload: RealtimePostgresChangesPayload<DatabaseFriendRow>) => {
+    await syncFriendData(state, userId)
   }
 
   // Subscribe to friend request changes

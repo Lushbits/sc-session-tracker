@@ -1,12 +1,5 @@
-import { type Metadata } from 'next'
-import { Discord } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LoginForm } from '@/components/auth/LoginForm'
-
-export const metadata: Metadata = {
-  title: 'SC Session Tracker',
-  description: 'Track your Star Citizen gaming sessions',
-}
 
 export default function Page() {
   return (
