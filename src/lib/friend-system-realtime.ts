@@ -42,22 +42,28 @@ const syncFriendData = async (state: FriendSystemState, userId: string) => {
 
     // Update friends
     const mappedFriends = friendsData.data
-      .map(record => {
-        const friendRecord = {
-          id: record.id,
-          user_id: record.user_id,
-          friend_id: record.friend_id,
-          friend: record.friend
-        } as unknown as DatabaseFriendRecord
-        return mapProfile(friendRecord.friend)
-      })
+      .map(record => mapProfile(record.friend))
       .filter((profile): profile is Profile => profile !== null)
     state.setFriends(mappedFriends)
 
     // Split and update requests
-    const mappedRequests = requestsData.data.map(request => 
-      mapRequestWithProfiles(request as DatabaseFriendRequest)
-    )
+    const mappedRequests = requestsData.data.map(request => {
+      const sender = mapProfile(request.sender)
+      const receiver = mapProfile(request.receiver)
+      if (!sender || !receiver) return null
+      
+      return {
+        id: request.id,
+        sender_id: request.sender_id,
+        receiver_id: request.receiver_id,
+        status: request.status,
+        created_at: request.created_at,
+        updated_at: request.updated_at,
+        sender,
+        receiver
+      }
+    }).filter((request): request is FriendRequest => request !== null)
+
     const pending = mappedRequests.filter(r => r.status === 'pending' && r.receiver_id === userId)
     const sent = mappedRequests.filter(r => r.status === 'pending' && r.sender_id === userId)
     
@@ -81,55 +87,15 @@ export const setupFriendRequestSubscription = (
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'friend_requests' },
-      async (payload: RealtimePostgresChangesPayload<DatabaseFriendRequest>) => {
-        console.log('Friend request change:', payload.eventType, payload)
-        const newRequest = payload.new as DatabaseFriendRequest | null
-        const oldRequest = payload.old as DatabaseFriendRequest | null
-        
-        if (newRequest?.sender_id === userId || newRequest?.receiver_id === userId ||
-            oldRequest?.sender_id === userId || oldRequest?.receiver_id === userId) {
-          await syncFriendData(state, userId)
-        }
+      async () => {
+        await syncFriendData(state, userId)
       }
     )
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'friends' },
-      async (payload: RealtimePostgresChangesPayload<DatabaseFriendRecord>) => {
-        console.log('Friend change:', payload.eventType, payload)
-        const newRecord = payload.new as DatabaseFriendRecord | null
-        const oldRecord = payload.old as DatabaseFriendRecord | null
-        
-        // For DELETE events, immediately update local state and then sync
-        if (payload.eventType === 'DELETE' && oldRecord) {
-          console.log('Processing friend DELETE event', { oldRecord, currentState: state.friends })
-          // Immediately remove the friend from local state
-          state.setFriends(prev => {
-            const updatedFriends = prev.filter(friend => {
-              // If this user was the user_id in the record, filter out the friend with friend_id
-              if (oldRecord.user_id === userId) {
-                return friend.user_id !== oldRecord.friend_id
-              }
-              // If this user was the friend_id in the record, filter out the friend with user_id
-              if (oldRecord.friend_id === userId) {
-                return friend.user_id !== oldRecord.user_id
-              }
-              return true
-            })
-            console.log('Updated friends after DELETE', updatedFriends)
-            return updatedFriends
-          })
-          
-          // Then sync with server to ensure consistency
-          await syncFriendData(state, userId)
-          return
-        }
-        
-        // For other events, check both records and sync
-        if (newRecord?.user_id === userId || newRecord?.friend_id === userId ||
-            oldRecord?.user_id === userId || oldRecord?.friend_id === userId) {
-          await syncFriendData(state, userId)
-        }
+      async () => {
+        await syncFriendData(state, userId)
       }
     )
 

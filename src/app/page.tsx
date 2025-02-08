@@ -1,17 +1,16 @@
-import type { Metadata } from 'next'
-import { DiscordIcon } from 'lucide-react'
+import { type Metadata } from 'next'
+import { Discord } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { EmailAuthForm } from '@/components/auth/email-auth-form'
+import { LoginForm } from '@/components/auth/LoginForm'
 
 export const metadata: Metadata = {
-  title: 'Session Tracker',
-  description: 'Track your study sessions and compete with friends',
+  title: 'SC Session Tracker',
+  description: 'Track your Star Citizen gaming sessions',
 }
 
-export default function LandingPage() {
+export default function Page() {
   return (
-    <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
         <div className="absolute inset-0 bg-zinc-900" />
         <div className="relative z-20 flex items-center text-lg font-medium">
@@ -27,12 +26,13 @@ export default function LandingPage() {
           >
             <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
           </svg>
-          Session Tracker
+          SC Session Tracker
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              Track your study sessions, compete with friends, and stay motivated.
+              Track your Star Citizen gaming sessions, monitor your aUEC balance,
+              and share your adventures with friends.
             </p>
           </blockquote>
         </div>
@@ -41,49 +41,26 @@ export default function LandingPage() {
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
-              Welcome to Session Tracker
+              Welcome back
             </h1>
             <p className="text-sm text-muted-foreground">
-              Sign in to your account or create a new one
+              Sign in with Discord to continue
             </p>
           </div>
-
-          <Tabs defaultValue="email" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="email">Email</TabsTrigger>
-              <TabsTrigger value="discord">Discord</TabsTrigger>
-            </TabsList>
-            <TabsContent value="email" className="space-y-4">
-              <Tabs defaultValue="login">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="login">Login</TabsTrigger>
-                  <TabsTrigger value="register">Register</TabsTrigger>
-                </TabsList>
-                <TabsContent value="login">
-                  <EmailAuthForm mode="login" />
-                </TabsContent>
-                <TabsContent value="register">
-                  <EmailAuthForm mode="register" />
-                </TabsContent>
-              </Tabs>
-            </TabsContent>
-            <TabsContent value="discord">
-              <form action="/auth/sign-in" method="post">
-                <Button className="w-full" type="submit">
-                  <DiscordIcon className="mr-2 h-4 w-4" />
-                  Continue with Discord
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
+          <LoginForm />
           <p className="px-8 text-center text-sm text-muted-foreground">
             By clicking continue, you agree to our{' '}
-            <a href="/terms" className="underline underline-offset-4 hover:text-primary">
+            <a
+              href="/terms"
+              className="underline underline-offset-4 hover:text-primary"
+            >
               Terms of Service
             </a>{' '}
             and{' '}
-            <a href="/privacy" className="underline underline-offset-4 hover:text-primary">
+            <a
+              href="/privacy"
+              className="underline underline-offset-4 hover:text-primary"
+            >
               Privacy Policy
             </a>
             .

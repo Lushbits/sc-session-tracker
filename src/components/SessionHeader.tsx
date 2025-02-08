@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
-import { CheckIcon, PauseIcon, PlayIcon, XIcon } from 'lucide-react'
+import { CheckIcon, PauseIcon, PlayIcon } from 'lucide-react'
 
 interface SessionHeaderProps {
   elapsedTime: string

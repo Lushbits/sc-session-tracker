@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
 import { useAuth } from './AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Profile, FriendRequest, FriendContextType } from '@/types/friend-system'
@@ -6,6 +6,17 @@ import { setupFriendRequestSubscription, FriendSystemState } from '@/lib/friend-
 import { useToast } from '@/components/ui/use-toast'
 import { getLoadingKey } from '@/lib/friend-system-helpers'
 import * as friendSystemDb from '@/lib/friend-system-db'
+
+export interface FriendRequest {
+  id: string
+  sender_id: string
+  receiver_id: string
+  status: 'pending' | 'accepted' | 'rejected'
+  created_at: string
+  updated_at: string
+  sender: Profile
+  receiver: Profile
+}
 
 const FriendContext = createContext<FriendContextType | undefined>(undefined)
 

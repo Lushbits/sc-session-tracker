@@ -59,22 +59,8 @@ export const getFriendRequests = async (userId: string): Promise<FriendRequest[]
       status,
       created_at,
       updated_at,
-      sender:profiles!sender_id(
-        id,
-        user_id,
-        display_name,
-        avatar_url,
-        created_at,
-        updated_at
-      ),
-      receiver:profiles!receiver_id(
-        id,
-        user_id,
-        display_name,
-        avatar_url,
-        created_at,
-        updated_at
-      )
+      sender:profiles!sender_id(*),
+      receiver:profiles!receiver_id(*)
     `)
     .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
 
@@ -83,7 +69,16 @@ export const getFriendRequests = async (userId: string): Promise<FriendRequest[]
     throw error
   }
 
-  return requests.map(mapRequestWithProfiles)
+  return requests.map(request => ({
+    id: request.id,
+    sender_id: request.sender_id,
+    receiver_id: request.receiver_id,
+    status: request.status,
+    created_at: request.created_at,
+    updated_at: request.updated_at,
+    sender: mapProfile(request.sender),
+    receiver: mapProfile(request.receiver)
+  }))
 }
 
 export const sendFriendRequest = async (senderId: string, receiverId: string): Promise<FriendRequest> => {
@@ -97,22 +92,8 @@ export const sendFriendRequest = async (senderId: string, receiverId: string): P
       status,
       created_at,
       updated_at,
-      sender:profiles!sender_id(
-        id,
-        user_id,
-        display_name,
-        avatar_url,
-        created_at,
-        updated_at
-      ),
-      receiver:profiles!receiver_id(
-        id,
-        user_id,
-        display_name,
-        avatar_url,
-        created_at,
-        updated_at
-      )
+      sender:profiles!sender_id(*),
+      receiver:profiles!receiver_id(*)
     `)
     .single()
 
@@ -121,7 +102,16 @@ export const sendFriendRequest = async (senderId: string, receiverId: string): P
     throw error
   }
 
-  return mapRequestWithProfiles(request)
+  return {
+    id: request.id,
+    sender_id: request.sender_id,
+    receiver_id: request.receiver_id,
+    status: request.status,
+    created_at: request.created_at,
+    updated_at: request.updated_at,
+    sender: mapProfile(request.sender),
+    receiver: mapProfile(request.receiver)
+  }
 }
 
 export const updateFriendRequest = async (requestId: string, status: 'accepted' | 'rejected'): Promise<FriendRequest> => {
@@ -136,22 +126,8 @@ export const updateFriendRequest = async (requestId: string, status: 'accepted' 
       status,
       created_at,
       updated_at,
-      sender:profiles!sender_id(
-        id,
-        user_id,
-        display_name,
-        avatar_url,
-        created_at,
-        updated_at
-      ),
-      receiver:profiles!receiver_id(
-        id,
-        user_id,
-        display_name,
-        avatar_url,
-        created_at,
-        updated_at
-      )
+      sender:profiles!sender_id(*),
+      receiver:profiles!receiver_id(*)
     `)
     .single()
 
@@ -160,7 +136,16 @@ export const updateFriendRequest = async (requestId: string, status: 'accepted' 
     throw error
   }
 
-  return mapRequestWithProfiles(request)
+  return {
+    id: request.id,
+    sender_id: request.sender_id,
+    receiver_id: request.receiver_id,
+    status: request.status,
+    created_at: request.created_at,
+    updated_at: request.updated_at,
+    sender: mapProfile(request.sender),
+    receiver: mapProfile(request.receiver)
+  }
 }
 
 export const deleteFriendRequest = async (requestId: string): Promise<void> => {
@@ -182,14 +167,7 @@ export const getFriends = async (userId: string): Promise<Profile[]> => {
       id,
       user_id,
       friend_id,
-      friend:profiles!friend_id(
-        id,
-        user_id,
-        display_name,
-        avatar_url,
-        created_at,
-        updated_at
-      )
+      friend:profiles!friend_id(*)
     `)
     .eq('user_id', userId)
 
@@ -199,5 +177,8 @@ export const getFriends = async (userId: string): Promise<Profile[]> => {
   }
 
   if (!data) return []
-  return data.map(record => mapProfile(record.friend))
+  
+  return data
+    .map(record => mapProfile(record.friend))
+    .filter((profile): profile is Profile => profile !== null)
 } 

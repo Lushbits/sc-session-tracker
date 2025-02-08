@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Check, X, Loader2 } from 'lucide-react'
-import { useFriends, FriendRequest } from '@/contexts/FriendContext'
+import { useFriends } from '@/contexts/FriendContext'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import { formatDistanceToNow } from 'date-fns'
 import { cn } from '@/lib/utils'
 
 interface FriendRequestsProps {
