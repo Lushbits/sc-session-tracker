@@ -11,7 +11,7 @@ export function Footer() {
         <div>
           Webapp made by{' '}
           <a
-            href="https://x.com/Lushbits"
+            href="https://lushbits.com"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline"

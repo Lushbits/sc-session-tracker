@@ -192,36 +192,31 @@ export function CaptainLogCard({ log, onDelete, onToggleFavorite }: CaptainLogCa
       </AlertDialog>
 
       <Dialog open={showFullLog} onOpenChange={setShowFullLog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Captain's Log</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             {log.images[0] && (
-              <div className="relative group/fullimage">
+              <div className="relative group/fullimage cursor-pointer"
+                   onClick={() => {
+                     window.open(getOriginalImageUrl(log.images[0].storage_path), '_blank');
+                   }}>
                 <img
                   src={getTransformedImageUrl(log.images[0].storage_path, { 
-                    width: 800,
-                    quality: 90,
+                    width: 1200,
+                    quality: 95,
                     resize: 'contain'
                   })}
-                  alt="Log attachment"
-                  className="w-full rounded-lg"
-                  onClick={() => {
-                    setShowFullLog(false)
-                    setShowFullImage(true)
-                  }}
+                  alt="Full size"
+                  className="w-full max-h-[80vh] object-contain rounded-lg"
                 />
                 <div className="absolute inset-0 flex items-end justify-end p-2 opacity-0 group-hover/fullimage:opacity-100 transition-opacity">
-                  <a
-                    href={getOriginalImageUrl(log.images[0].storage_path)}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <div
                     className="bg-black/50 hover:bg-black/70 text-white text-sm px-3 py-1.5 rounded-md backdrop-blur-sm transition-colors"
-                    onClick={(e) => e.stopPropagation()}
                   >
                     Open original in new tab
-                  </a>
+                  </div>
                 </div>
               </div>
             )}
@@ -254,7 +249,10 @@ export function CaptainLogCard({ log, onDelete, onToggleFavorite }: CaptainLogCa
             <DialogTitle>Image</DialogTitle>
           </DialogHeader>
           {log.images[0] && (
-            <div className="relative group/fullimage">
+            <div className="relative group/fullimage cursor-pointer"
+                 onClick={() => {
+                   window.open(getOriginalImageUrl(log.images[0].storage_path), '_blank');
+                 }}>
               <img
                 src={getTransformedImageUrl(log.images[0].storage_path, { 
                   width: 1200,
@@ -265,15 +263,11 @@ export function CaptainLogCard({ log, onDelete, onToggleFavorite }: CaptainLogCa
                 className="w-full max-h-[80vh] object-contain rounded-lg"
               />
               <div className="absolute inset-0 flex items-end justify-end p-2 opacity-0 group-hover/fullimage:opacity-100 transition-opacity">
-                <a
-                  href={getOriginalImageUrl(log.images[0].storage_path)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <div
                   className="bg-black/50 hover:bg-black/70 text-white text-sm px-3 py-1.5 rounded-md backdrop-blur-sm transition-colors"
-                  onClick={(e) => e.stopPropagation()}
                 >
                   Open original in new tab
-                </a>
+                </div>
               </div>
             </div>
           )}

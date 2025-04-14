@@ -98,7 +98,7 @@ export function LandingPage() {
           <div className="text-center text-muted-foreground text-sm px-4">
             Made with <Heart className="inline-block w-4 h-4 mx-1 text-red-500 fill-red-500" /> by the{' '}
             <a
-              href="https://robertsspaceindustries.com/play-star-citizen"
+              href="https://robertsspaceindustries.com/en/star-citizen"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"

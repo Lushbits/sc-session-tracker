@@ -49,7 +49,7 @@ export function SessionDetailsDialog({
   const checkScrollability = useCallback(() => {
     if (scrollViewportRef.current) {
       const viewport = scrollViewportRef.current
-      const hasScroll = viewport.scrollHeight > viewport.clientHeight
+      const hasScroll = viewport.scrollHeight > viewport.clientHeight + 20
       const isNotAtBottom = viewport.scrollTop < (viewport.scrollHeight - viewport.clientHeight - 10)
       setShowScrollIndicator(hasScroll && isNotAtBottom)
     }
@@ -60,10 +60,11 @@ export function SessionDetailsDialog({
     if (isOpen && scrollViewportRef.current) {
       // Reset scroll position
       scrollViewportRef.current.scrollTop = 0
+      setHasScrolled(false)
       setShowScrollIndicator(false)
 
       // Series of checks at different intervals
-      const checkTimes = [0, 100, 300, 500, 1000]
+      const checkTimes = [100, 300, 500, 1000]
       const timeouts = checkTimes.map(time => 
         setTimeout(() => {
           if (scrollViewportRef.current) {
@@ -114,11 +115,13 @@ export function SessionDetailsDialog({
     }
   }, [logs, checkScrollability])
 
+  // Handle scroll event
   const handleScrollPositionChange = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     if (!hasScrolled && event.currentTarget.scrollTop > 0) {
       setHasScrolled(true)
     }
-    checkScrollability()
+    // Only check scrollability after a small delay to avoid interfering with the scroll
+    setTimeout(() => checkScrollability(), 100);
   }, [checkScrollability, hasScrolled])
 
   // Reset hasScrolled when opening new session

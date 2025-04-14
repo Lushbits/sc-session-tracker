@@ -51,6 +51,42 @@ export function SessionChart({
               type="number"
               domain={[0, 'dataMax']}
               tickFormatter={formatSeconds}
+              ticks={(function() {
+                if (processedData.length < 2) return [0];
+                
+                const maxTime = Math.max(...processedData.map(d => d.time));
+                const ticks = [0]; // Always include start time
+                
+                // Choose interval based on session duration
+                let interval;
+                if (maxTime <= 30 * 60) { // <= 30 minutes
+                  interval = 5 * 60; // 5 minute intervals
+                } else if (maxTime <= 2 * 60 * 60) { // <= 2 hours
+                  interval = 15 * 60; // 15 minute intervals
+                } else if (maxTime <= 6 * 60 * 60) { // <= 6 hours
+                  interval = 30 * 60; // 30 minute intervals
+                } else if (maxTime <= 24 * 60 * 60) { // <= 24 hours
+                  interval = 1 * 60 * 60; // 1 hour intervals
+                } else { // > 24 hours
+                  interval = 4 * 60 * 60; // 4 hour intervals
+                }
+                
+                // Add ticks at the determined interval
+                let currentTime = interval;
+                while (currentTime < maxTime) {
+                  ticks.push(currentTime);
+                  currentTime += interval;
+                }
+                
+                // Always include the end time if it's not already included
+                // and isn't too close to the last tick
+                const lastTick = ticks[ticks.length - 1];
+                if (lastTick !== maxTime && (maxTime - lastTick) > interval * 0.2) {
+                  ticks.push(maxTime);
+                }
+                
+                return ticks;
+              })()}
             />
             <YAxis
               stroke="hsl(var(--muted-foreground))"

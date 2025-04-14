@@ -8,6 +8,15 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.4.1',
+    date: '2025-04-15',
+    changes: [
+      'Updated chart x axis labels to be more readable',
+      'Made captain\'s log card images larger',
+      'Made minor UI improvements and bug fixes'
+    ]
+  },
+  {
     version: '0.4.0',
     date: '2025-02-08',
     changes: [
