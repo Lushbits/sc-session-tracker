@@ -1,22 +1,69 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Heart } from 'lucide-react'
 import { Dialog, DialogContent } from './ui/dialog'
 import { Footer } from './Footer'
 import { LoginForm } from './auth/LoginForm'
 import newSessionView from '../assets/images/new-sessionview.png'
 import newUpdateBalance from '../assets/images/new-updatebalance.png'
-import newCaptLog from '../assets/images/new-captlog.png'
+import comLogs from '../assets/images/comlogs.png'
+import './starry-bg.css'
 
 export function LandingPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [stars, setStars] = useState<{ x: number; y: number; size: number; delay: number; duration: number }[]>([])
+
+  useEffect(() => {
+    // Generate random stars
+    const generateStars = () => {
+      const newStars = []
+      const starCount = 150 // Number of stars
+      
+      for (let i = 0; i < starCount; i++) {
+        newStars.push({
+          x: Math.random() * 100, // Random x position (0-100%)
+          y: Math.random() * 100, // Random y position (0-100%)
+          size: 0.5 + Math.random() * 1.5, // Random size (0.5-2px)
+          delay: Math.random() * 10, // Random delay (0-10s)
+          duration: 3 + Math.random() * 4 // Random duration (3-7s)
+        })
+      }
+      
+      setStars(newStars)
+    }
+    
+    generateStars()
+  }, [])
 
   return (
-    <div className="min-h-screen bg-background landing-page flex flex-col">
-      <main className="flex-1 flex flex-col items-center justify-center py-16">
+    <div className="min-h-screen bg-background landing-page flex flex-col relative overflow-hidden">
+      {/* Starry background */}
+      <div className="starry-bg absolute inset-0 pointer-events-none">
+        {stars.map((star, index) => (
+          <div
+            key={index}
+            className="star"
+            style={{
+              left: `${star.x}%`,
+              top: `${star.y}%`,
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              animationDelay: `${star.delay}s`,
+              animationDuration: `${star.duration}s`
+            }}
+          />
+        ))}
+      </div>
+      
+      <main className="flex-1 flex flex-col items-center justify-center py-16 relative z-10">
         <div className="w-full max-w-6xl space-y-16">
           {/* Hero Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center px-4">
-            <div className="space-y-6">
+            <div className="space-y-6 relative">
+              <div className="absolute -top-8 -left-4 transform -rotate-6 animate-pulse">
+                <div className="bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-medium px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap border border-white/10">
+                  ver 0.5 just launched with community logs!
+                </div>
+              </div>
               <h1 className="text-4xl font-bold">
                 SC Session Tracker
               </h1>
@@ -28,7 +75,7 @@ export function LandingPage() {
                   className="text-primary hover:underline"
                 >
                   Star Citizen
-                </a> gaming sessions. Track your earnings, spend, and profits, all while documenting your adventures across the stars in your very own Captain's Log.
+                </a> gaming sessions. Track your earnings, spend, and profits, all while documenting your adventures across the stars. Share your most memorable experiences with the community through our new Community Logs system!
               </p>
             </div>
             <div className="flex flex-col items-center justify-center">
@@ -43,7 +90,7 @@ export function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
             <div className="space-y-4">
               <div 
-                className="aspect-[16/10] rounded-lg border bg-card/50 backdrop-blur overflow-hidden cursor-pointer hover:border-primary transition-colors"
+                className="aspect-[16/10] rounded-lg border bg-card backdrop-blur-md overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)]"
                 onClick={() => setSelectedImage(newSessionView)}
               >
                 <img 
@@ -59,7 +106,7 @@ export function LandingPage() {
             </div>
             <div className="space-y-4">
               <div 
-                className="aspect-[16/10] rounded-lg border bg-card/50 backdrop-blur overflow-hidden cursor-pointer hover:border-primary transition-colors"
+                className="aspect-[16/10] rounded-lg border bg-card backdrop-blur-md overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)]"
                 onClick={() => setSelectedImage(newUpdateBalance)}
               >
                 <img 
@@ -75,22 +122,30 @@ export function LandingPage() {
             </div>
             <div className="space-y-4">
               <div 
-                className="aspect-[16/10] rounded-lg border bg-card/50 backdrop-blur overflow-hidden cursor-pointer hover:border-primary transition-colors relative"
-                onClick={() => setSelectedImage(newCaptLog)}
+                className="aspect-[16/10] rounded-lg border bg-card backdrop-blur-md overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)] relative"
+                onClick={() => setSelectedImage(comLogs)}
               >
-                <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs font-semibold px-2 py-1 rounded">
-                  NEW
+                <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                  HOT NEW FEATURE
                 </div>
                 <img 
-                  src={newCaptLog} 
-                  alt="Captain's log interface" 
+                  src={comLogs} 
+                  alt="Community logs interface" 
                   className="w-full h-full object-cover"
                 />
               </div>
-              <h2 className="text-2xl font-semibold tracking-tight">Captain's Log</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold tracking-tight">Community Logs</h2>
+                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Just Launched!</span>
+              </div>
               <p className="text-muted-foreground">
-                Keep track of your adventures with detailed logs. Add images and notes to remember your most memorable moments in the verse.
+                Share your most epic adventures with the Star Citizen community! Publish logs and upvote memorable stories. Connect with fellow pilots through shareable logs with images and detailed stories.
               </p>
+              <div className="flex flex-wrap gap-2 text-xs">
+                <span className="bg-secondary/60 px-2 py-1 rounded-full">Upvote logs</span>
+                <span className="bg-secondary/60 px-2 py-1 rounded-full">Share with friends</span>
+                <span className="bg-secondary/60 px-2 py-1 rounded-full">Discover adventures</span>
+              </div>
             </div>
           </div>
 

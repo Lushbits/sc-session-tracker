@@ -20,23 +20,24 @@ interface SessionTableRowProps {
 
 export function SessionTableRow({ session, stats, onView, onDelete }: SessionTableRowProps) {
   const formattedDate = `${formatTimeAgo(new Date(session.startTime))} • ${formatLocalDateTime(session.startTime)} • ${session.endTime ? 'Completed' : 'Active'}`
-
+  const endBalance = session.initialBalance + stats.sessionProfit
+  
   return (
     <tr className="hover:bg-white/5 border-t border-white/5">
       <td className="py-5 px-4">
         <div>
-          <div className="text-base mb-1">{session.description || 'Untitled Session'}</div>
+          <div className="text-lg mb-1 font-bold">{session.description || 'Untitled Session'}</div>
           <div className="text-xs text-muted-foreground">{formattedDate}</div>
         </div>
       </td>
-      <td className="py-5 px-4 text-sm text-[hsl(var(--event-earning))] text-right">
-        {stats.totalEarnings > 0 ? `+${formatNumber(stats.totalEarnings)} aUEC` : '0 aUEC'}
+      <td className="py-5 px-4 text-sm text-white text-right font-bold">
+        {formatNumber(session.initialBalance)} aUEC
       </td>
-      <td className="py-5 px-4 text-sm text-[hsl(var(--event-spending))] text-right">
-        {stats.totalSpend > 0 ? `-${formatNumber(stats.totalSpend)} aUEC` : '0 aUEC'}
-      </td>
-      <td className={`py-5 px-4 text-sm text-right ${stats.sessionProfit >= 0 ? 'text-[hsl(var(--event-earning))]' : 'text-[hsl(var(--event-spending))]'}`}>
+      <td className={`py-5 px-4 text-sm text-right font-bold ${stats.sessionProfit >= 0 ? 'text-[hsl(var(--event-earning))]' : 'text-[hsl(var(--event-spending))]'}`}>
         {stats.sessionProfit > 0 ? '+' : ''}{formatNumber(stats.sessionProfit)} aUEC
+      </td>
+      <td className="py-5 px-4 text-sm text-white text-right font-bold">
+        {formatNumber(endBalance)} aUEC
       </td>
       <td className="py-5 px-4 text-sm text-muted-foreground text-right">
         {stats.duration.hours} hours {stats.duration.minutes} minutes

@@ -18,6 +18,7 @@ import { Loader2 } from 'lucide-react'
 import { FriendsPage } from './pages/friends'
 import { FriendLogsGrid } from './components/friend-logs/friend-logs-grid'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { PublicLogView } from './components/public-log-view'
 
 function Redirect({ to }: { to: string }) {
   const [_, setLocation] = useLocation();
@@ -171,7 +172,17 @@ function App() {
   if (!isAuthenticated) {
     return (
       <ThemeProvider defaultTheme="dark">
-        <LandingPage />
+        <Router>
+          <Switch>
+            {/* Allow access to public log shares without authentication */}
+            <Route path="/share/log/:id">
+              {(params) => <PublicLogView logId={params.id} />}
+            </Route>
+            <Route>
+              <LandingPage />
+            </Route>
+          </Switch>
+        </Router>
       </ThemeProvider>
     )
   }
@@ -197,6 +208,10 @@ function App() {
                 )}
 
                 <Switch>
+                  {/* Allow access to public log shares when authenticated */}
+                  <Route path="/share/log/:id">
+                    {(params) => <PublicLogView logId={params.id} />}
+                  </Route>
                   <Route path="/sessions/:id">
                     {(params) => {
                       const session = sessions.find(s => s.id === params.id)

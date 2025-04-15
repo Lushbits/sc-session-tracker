@@ -1,17 +1,34 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useInfiniteQuery } from '@tanstack/react-query'
-import { useInView } from 'react-intersection-observer'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { FriendLogCard } from './friend-log-card'
 import { FriendFilterDropdown } from './friend-filter-dropdown'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/contexts/AuthContext'
-import { toast } from '@/components/ui/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import { Link } from 'wouter'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationButton,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationFirst,
+  PaginationLast,
+  PaginationEllipsis,
+} from '@/components/ui/pagination'
 
-const LOGS_PER_PAGE = 20
+const LOGS_PER_PAGE = 12 // Match the same number used in other log views
 
 interface Friend {
   id: string
@@ -23,6 +40,10 @@ interface FriendLog {
   text: string
   created_at: string
   user_id: string
+  upvotes?: number
+  downvotes?: number
+  score?: number
+  user_vote?: number
   log_images: Array<{
     id: string
     storage_path: string
@@ -34,12 +55,20 @@ interface FriendLog {
   }
 }
 
+// Define a response type for our query
+interface FriendLogsResponse {
+  logs: FriendLog[]
+  totalCount: number
+}
+
 export function FriendLogsGrid() {
   const { user } = useAuth()
   const [selectedFriendIds, setSelectedFriendIds] = useState<string[]>([])
   const [friends, setFriends] = useState<Friend[]>([])
   const [allFriends, setAllFriends] = useState<Friend[]>([])
-  const { ref, inView } = useInView()
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -124,19 +153,20 @@ export function FriendLogsGrid() {
     }
   }, [user?.id])
 
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedFriendIds])
+
   const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    status,
+    data: logs,
     isLoading,
     error: queryError
-  } = useInfiniteQuery({
-    queryKey: ['friendLogs', selectedFriendIds, user?.id],
-    queryFn: async ({ pageParam }: { pageParam: number }) => {
+  } = useQuery<FriendLogsResponse>({
+    queryKey: ['friendLogs', selectedFriendIds, user?.id, currentPage],
+    queryFn: async () => {
       try {
-        if (!user?.id) return []
+        if (!user?.id) return { logs: [], totalCount: 0 }
 
         // Use selectedFriendIds if any are selected, otherwise get all friend IDs
         let friendIds: string[] = []
@@ -153,7 +183,11 @@ export function FriendLogsGrid() {
           friendIds = friendsData?.map(f => f.friend_id) || []
         }
 
-        if (friendIds.length === 0) return []
+        if (friendIds.length === 0) return { logs: [], totalCount: 0 }
+
+        // Calculate range for pagination
+        const from = (currentPage - 1) * LOGS_PER_PAGE
+        const to = from + LOGS_PER_PAGE - 1
 
         // Query logs with explicit friend IDs
         const { data: logs, error } = await supabase
@@ -162,11 +196,14 @@ export function FriendLogsGrid() {
             id,
             text,
             created_at,
-            user_id
+            user_id,
+            upvotes,
+            downvotes,
+            score
           `)
           .in('user_id', friendIds)
           .order('created_at', { ascending: false })
-          .range(pageParam * LOGS_PER_PAGE, (pageParam + 1) * LOGS_PER_PAGE - 1)
+          .range(from, to)
         
         if (error) throw error
 
@@ -215,6 +252,24 @@ export function FriendLogsGrid() {
           })
         })
         
+        // Fetch user's votes if logged in
+        let userVotes = {};
+        if (user?.id) {
+          const logIds = logs?.map(log => log.id) || [];
+          const { data: votes, error: votesError } = await supabase
+            .from('log_votes')
+            .select('log_id, vote_type')
+            .eq('user_id', user.id)
+            .in('log_id', logIds);
+            
+          if (!votesError && votes) {
+            userVotes = votes.reduce((acc: any, vote: any) => {
+              acc[vote.log_id] = vote.vote_type;
+              return acc;
+            }, {});
+          }
+        }
+
         // Transform the logs to handle missing profiles
         const transformedLogs = (logs || []).map((rawLog: any) => {
           const profile = profileMap.get(rawLog.user_id)
@@ -223,6 +278,10 @@ export function FriendLogsGrid() {
             text: rawLog.text,
             created_at: rawLog.created_at,
             user_id: rawLog.user_id,
+            upvotes: rawLog.upvotes || 0,
+            downvotes: rawLog.downvotes || 0,
+            score: rawLog.score || 0,
+            user_vote: (userVotes as any)[rawLog.id] || 0,
             log_images: imagesMap.get(rawLog.id) || [],
             profiles: {
               display_name: profile?.display_name || `User ${rawLog.user_id.slice(0, 8)}`,
@@ -232,24 +291,147 @@ export function FriendLogsGrid() {
           }
         }) as FriendLog[]
 
-        return transformedLogs
+        // Also get total count for pagination
+        const { count, error: countError } = await supabase
+          .from('captain_logs')
+          .select('id', { count: 'exact', head: true })
+          .in('user_id', friendIds)
+        
+        if (countError) {
+          console.error('Error getting log count:', countError)
+        }
+
+        return {
+          logs: transformedLogs,
+          totalCount: count || 0
+        }
       } catch (error) {
         console.error('Error fetching friend logs:', error)
         throw error
       }
     },
-    getNextPageParam: (lastPage, allPages) => {
-      return lastPage?.length === LOGS_PER_PAGE ? allPages.length : undefined
-    },
-    initialPageParam: 0,
     enabled: !!user?.id
   })
 
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
+  // Handler function for voting on a log
+  const handleVoteOnLog = async (logId: string, voteType: number) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "You need to be signed in to vote on logs.",
+        variant: "destructive"
+      })
+      return
     }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
+
+    try {
+      // Find current log to check if user already voted
+      const currentLog = logs?.logs.find(log => log.id === logId);
+      if (!currentLog) return;
+      
+      // Get current vote value (if any)
+      const currentVote = currentLog.user_vote || 0;
+      
+      // Determine the new vote value - toggle if same vote type
+      let newVoteValue = voteType;
+      if (currentVote === voteType) {
+        // If clicking the same button again, remove the vote
+        newVoteValue = 0;
+      }
+      
+      console.log(`Log ${logId}: Current vote=${currentVote}, New vote=${newVoteValue}`);
+      
+      // Call the toggle_vote_on_log RPC function - same as community logs
+      const { error } = await supabase.rpc('toggle_vote_on_log', {
+        p_log_id: logId,
+        p_user_id: user.id,
+        p_vote_type: newVoteValue
+      })
+
+      if (error) throw error
+
+      toast({
+        title: newVoteValue === 0 ? "Vote Removed" : "Upvoted",
+        description: newVoteValue === 0 
+          ? "Your vote has been removed." 
+          : "You have upvoted this log."
+      })
+
+      // Update the UI with the new vote (optimistic update)
+      queryClient.setQueryData(
+        ['friendLogs', selectedFriendIds, user.id, currentPage],
+        (oldData: any) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            logs: oldData.logs.map((log: any) => {
+              if (log.id === logId) {
+                // Calculate vote changes
+                let upvoteChange = 0;
+                
+                // Remove previous vote
+                if (currentVote === 1) upvoteChange--;
+                
+                // Add new vote
+                if (newVoteValue === 1) upvoteChange++;
+                
+                const newUpvotes = (log.upvotes || 0) + upvoteChange;
+                
+                return {
+                  ...log,
+                  upvotes: newUpvotes,
+                  user_vote: newVoteValue
+                };
+              }
+              return log;
+            })
+          };
+        }
+      );
+    } catch (error) {
+      console.error('Error voting on log:', error)
+      toast({
+        title: "Error",
+        description: "Failed to register your vote. Please try again.",
+        variant: "destructive"
+      })
+    }
+  };
+
+  // Calculate total pages for pagination
+  const totalPages = logs?.totalCount 
+    ? Math.max(1, Math.ceil(logs.totalCount / LOGS_PER_PAGE))
+    : 1;
+
+  // Function to handle page changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top when changing pages for better UX
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Add keyboard navigation for pagination
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Only handle when not typing in an input or textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      
+      const key = e.key.toLowerCase();
+      
+      if (key === 'a' && currentPage > 1) {
+        handlePageChange(currentPage - 1);
+      } else if (key === 'd' && currentPage < totalPages) {
+        handlePageChange(currentPage + 1);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentPage, totalPages]);
 
   if (isLoading) {
     return (
@@ -279,7 +461,7 @@ export function FriendLogsGrid() {
     )
   }
 
-  if (status === 'error') {
+  if (queryError) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <p>Error loading logs.</p>
@@ -290,13 +472,16 @@ export function FriendLogsGrid() {
     )
   }
 
-  const allLogs = data?.pages?.flatMap(page => page) || []
-  const isEmpty = allLogs.length === 0 && !isFetchingNextPage
+  const isEmpty = !logs?.logs || logs.logs.length === 0;
 
   return (
     <div className="container mx-auto p-4 py-12">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Friend's Logs</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-semibold tracking-tight">Friend's Logs</h1>
+          
+          
+        </div>
         <div className="flex justify-end">
           <FriendFilterDropdown
             friends={friends}
@@ -327,25 +512,198 @@ export function FriendLogsGrid() {
           </p>
         </div>
       ) : (
-        <div 
-          key={selectedFriendIds.join(',')} 
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        >
-          {allLogs.map((log: FriendLog) => (
-            <div
-              key={log.id}
-              className="transition-all duration-300 animate-in fade-in-0"
-            >
-              <FriendLogCard key={log.id} log={log} />
-            </div>
-          ))}
-          {isFetchingNextPage && (
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={`skeleton-${i}`} className="h-[320px] rounded-lg border bg-card animate-pulse" />
-            ))
+        <>
+          <div 
+            key={`${selectedFriendIds.join(',')}-${currentPage}`} 
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
+            {logs?.logs.map((log: FriendLog) => (
+              <div
+                key={log.id}
+                className="col-span-1 transition-all duration-300 animate-in fade-in-0"
+              >
+                <FriendLogCard 
+                  log={log} 
+                  onVote={handleVoteOnLog}
+                />
+              </div>
+            ))}
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <>
+              <Pagination className="mt-8">
+                <PaginationContent>
+                  <PaginationItem>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <PaginationFirst 
+                              onClick={() => handlePageChange(1)} 
+                              disabled={currentPage === 1}
+                            />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>First page</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <PaginationPrevious 
+                              onClick={() => handlePageChange(currentPage - 1)} 
+                              disabled={currentPage === 1}
+                            />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Previous page (or press A key)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </PaginationItem>
+                  
+                  {/* Generate page numbers */}
+                  {(() => {
+                    const pageNumbers = [];
+                    const maxPages = 5; // Max page buttons to show
+                    
+                    if (totalPages <= maxPages) {
+                      // Show all pages if there are fewer than maxPages
+                      for (let i = 1; i <= totalPages; i++) {
+                        pageNumbers.push(
+                          <PaginationItem key={i}>
+                            <PaginationButton
+                              isActive={currentPage === i}
+                              onClick={() => handlePageChange(i)}
+                            >
+                              {i}
+                            </PaginationButton>
+                          </PaginationItem>
+                        );
+                      }
+                    } else {
+                      // Always show first page
+                      pageNumbers.push(
+                        <PaginationItem key={1}>
+                          <PaginationButton
+                            isActive={currentPage === 1}
+                            onClick={() => handlePageChange(1)}
+                          >
+                            1
+                          </PaginationButton>
+                        </PaginationItem>
+                      );
+                      
+                      // Show ellipsis if not on first few pages
+                      if (currentPage > 3) {
+                        pageNumbers.push(
+                          <PaginationItem key="ellipsis1">
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        );
+                      }
+                      
+                      // Calculate range of pages to show around current page
+                      const start = Math.max(2, currentPage - 1);
+                      const end = Math.min(totalPages - 1, currentPage + 1);
+                      
+                      // Add pages between start and end
+                      for (let i = start; i <= end; i++) {
+                        if (i !== 1 && i !== totalPages) {
+                          pageNumbers.push(
+                            <PaginationItem key={i}>
+                              <PaginationButton
+                                isActive={currentPage === i}
+                                onClick={() => handlePageChange(i)}
+                              >
+                                {i}
+                              </PaginationButton>
+                            </PaginationItem>
+                          );
+                        }
+                      }
+                      
+                      // Show ellipsis if not on last few pages
+                      if (currentPage < totalPages - 2) {
+                        pageNumbers.push(
+                          <PaginationItem key="ellipsis2">
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        );
+                      }
+                      
+                      // Always show last page
+                      pageNumbers.push(
+                        <PaginationItem key={totalPages}>
+                          <PaginationButton
+                            isActive={currentPage === totalPages}
+                            onClick={() => handlePageChange(totalPages)}
+                          >
+                            {totalPages}
+                          </PaginationButton>
+                        </PaginationItem>
+                      );
+                    }
+                    
+                    return pageNumbers;
+                  })()}
+                  
+                  <PaginationItem>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <PaginationNext 
+                              onClick={() => handlePageChange(currentPage + 1)} 
+                              disabled={currentPage === totalPages}
+                            />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Next page (or press D key)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <PaginationLast 
+                              onClick={() => handlePageChange(totalPages)} 
+                              disabled={currentPage === totalPages}
+                            />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Last page</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+              
+              {/* Keyboard shortcuts tip below pagination */}
+              <div className="mt-3 text-center text-sm text-muted-foreground">
+                <span>Use</span>
+                <kbd className="mx-1 px-1.5 py-0.5 text-xs font-semibold bg-background border rounded-md shadow-sm">A</kbd>
+                <span>/</span>
+                <kbd className="mx-1 px-1.5 py-0.5 text-xs font-semibold bg-background border rounded-md shadow-sm">D</kbd>
+                <span>to navigate pages</span>
+              </div>
+            </>
           )}
-          <div ref={ref} className="h-4" />
-        </div>
+        </>
       )}
     </div>
   )

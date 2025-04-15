@@ -16,6 +16,13 @@ export interface DbCaptainLog {
   created_at: string
   updated_at: string
   deleted_session: boolean
+  is_favorite?: boolean
+  is_public?: boolean
+  reported_count?: number
+  is_hidden?: boolean
+  upvotes?: number
+  downvotes?: number
+  score?: number
   log_images: Array<{
     id: string
     storage_path: string
@@ -34,8 +41,19 @@ export interface CaptainLog {
   updated_at: string
   deleted_session: boolean
   is_favorite: boolean
+  is_public?: boolean
+  reported_count?: number
+  is_hidden?: boolean
+  upvotes?: number
+  downvotes?: number
+  score?: number
   images: CaptainLogImage[]
   session?: Session | null
+  author?: {
+    display_name: string
+    avatar_url?: string
+  } | null
+  user_vote?: number
 }
 
 export interface CaptainLogImage {
