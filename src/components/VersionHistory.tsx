@@ -8,6 +8,19 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.5.0',
+    date: '2025-04-15',
+    changes: [
+      'Launched Community Logs system for sharing adventures with other users',
+      'Added upvoting and downvoting functionality for community logs',
+      'Implemented public log views with shareable links',
+      'Enhanced UI with improved voting and sharing buttons',
+      'Added ability to discover community logs',
+      'Improved user experience for both logged-in and anonymous users',
+      'Optimized image loading and display in shared logs'
+    ]
+  },
+  {
     version: '0.4.1',
     date: '2025-04-15',
     changes: [

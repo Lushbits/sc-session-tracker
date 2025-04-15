@@ -13,15 +13,34 @@ export interface CaptainLogImage {
   created_at: string
 }
 
+export interface User {
+  id: string
+  display_name: string | null
+  avatar_url: string | null
+}
+
+export interface ImageFile {
+  id?: string
+  file?: File
+  storage_path?: string
+  url?: string
+}
+
 export interface CaptainLog {
   id: string
-  session_id: string
   user_id: string
+  session_id: string | null
   text: string
   created_at: string
-  updated_at: string
-  deleted_session: boolean
-  images: CaptainLogImage[]
+  images: ImageFile[]
+  author?: User
+  is_public?: boolean
+  reported_count?: number
+  is_hidden?: boolean
+  upvotes?: number
+  downvotes?: number
+  score?: number
+  user_vote?: number
 }
 
 export interface Session {
