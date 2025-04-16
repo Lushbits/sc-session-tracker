@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Trash2, Image as ImageIcon, Upload } from 'lucide-react'
+import { Trash2, Image as ImageIcon, Upload, Scissors } from 'lucide-react'
 import { useCaptainLogs } from '../hooks/useCaptainLogs'
 import { Button } from './ui/button'
 import { Textarea } from './ui/textarea'
@@ -21,6 +21,9 @@ import { useAuth } from '../contexts/AuthContext'
 import { deleteLogImages, getTransformedImageUrl, getOriginalImageUrl } from '../utils/storage'
 import { cn } from '@/lib/utils'
 import { CaptainLog } from '../types'
+import { Area } from 'react-easy-crop'
+import { getCroppedImg } from '../utils/image-crop'
+import { LogImageCropDialog } from './log-image-crop-dialog'
 
 interface CaptainLogsProps {
   sessionId: string
@@ -35,6 +38,7 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
   const [logToDelete, setLogToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isRemoving, setIsRemoving] = useState(false)
+  const [showCropDialog, setShowCropDialog] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { logs, addLog, setLogs } = useCaptainLogs(sessionId)
   const { toast } = useToast()
@@ -77,6 +81,41 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
       setSelectedImage(file)
       const url = URL.createObjectURL(file)
       setImagePreviewUrl(url)
+    }
+  }
+
+  const handleOpenCropDialog = () => {
+    if (imagePreviewUrl) {
+      setShowCropDialog(true)
+    }
+  }
+
+  const handleCropComplete = async (croppedAreaPixels: Area) => {
+    if (!imagePreviewUrl || !selectedImage) return
+    
+    try {
+      const croppedImageUrl = await getCroppedImg(
+        imagePreviewUrl,
+        croppedAreaPixels
+      )
+      
+      const response = await fetch(croppedImageUrl)
+      const blob = await response.blob()
+      
+      const file = new File([blob], selectedImage.name || 'log-image.jpg', {
+        type: 'image/jpeg'
+      })
+      
+      setSelectedImage(file)
+      setImagePreviewUrl(croppedImageUrl)
+      setShowCropDialog(false)
+    } catch (error) {
+      console.error('Error cropping image:', error)
+      toast({
+        title: "Error",
+        description: "Failed to crop image. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -152,21 +191,31 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
                 alt="Preview" 
                 className="w-full h-auto object-contain"
               />
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                className="absolute top-2 right-2"
-                onClick={() => {
-                  setSelectedImage(null)
-                  setImagePreviewUrl(null)
-                  if (fileInputRef.current) {
-                    fileInputRef.current.value = ''
-                  }
-                }}
-              >
-                Remove
-              </Button>
+              <div className="absolute top-2 right-2 flex gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleOpenCropDialog}
+                >
+                  <Scissors className="h-4 w-4 mr-1.5" />
+                  Crop
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedImage(null)
+                    setImagePreviewUrl(null)
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = ''
+                    }
+                  }}
+                >
+                  Remove
+                </Button>
+              </div>
             </div>
           )}
           <Textarea
@@ -330,6 +379,15 @@ export function CaptainLogs({ sessionId }: CaptainLogsProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {imagePreviewUrl && (
+        <LogImageCropDialog
+          open={showCropDialog}
+          onClose={() => setShowCropDialog(false)}
+          imageUrl={imagePreviewUrl}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   )
 } 

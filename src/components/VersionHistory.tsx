@@ -8,15 +8,18 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.5.2',
+    date: '2025-04-16',
+    changes: [
+      'Added crop functionality to Captain\'s Log images',
+    ]
+  },
+  {
     version: '0.5.1',
     date: '2025-04-16',
     changes: [
       'Added Admin Dashboard with comprehensive analytics',
-      'Added user signup trends chart',
-      'Added sessions per day tracking',
-      'Added log statistics and top user lists',
-      'Updated community logs with improved UI'
-    ]
+      ]
   },
   {
     version: '0.5.0',
@@ -26,8 +29,7 @@ export const versionHistory: VersionHistoryEntry[] = [
       'Added upvoting and downvoting functionality for community logs',
       'Implemented public log views with shareable links',
       'Enhanced UI with improved voting and sharing buttons',
-      'Added ability to discover community logs',
-      'Improved user experience for both logged-in and anonymous users',
+      'Paginated community logs and captain\'s logs',
       'Optimized image loading and display in shared logs'
     ]
   },
