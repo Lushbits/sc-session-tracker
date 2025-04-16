@@ -5,7 +5,7 @@ import { Footer } from './Footer'
 import { LoginForm } from './auth/LoginForm'
 import newSessionView from '../assets/images/new-sessionview.png'
 import newUpdateBalance from '../assets/images/new-updatebalance.png'
-import comLogs from '../assets/images/comlogs.png'
+import comLogs from '../assets/images/comlogs2.png'
 import './starry-bg.css'
 
 export function LandingPage() {

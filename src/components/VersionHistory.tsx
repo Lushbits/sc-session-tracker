@@ -8,6 +8,17 @@ export interface VersionHistoryEntry {
 
 export const versionHistory: VersionHistoryEntry[] = [
   {
+    version: '0.5.1',
+    date: '2025-04-16',
+    changes: [
+      'Added Admin Dashboard with comprehensive analytics',
+      'Added user signup trends chart',
+      'Added sessions per day tracking',
+      'Added log statistics and top user lists',
+      'Updated community logs with improved UI'
+    ]
+  },
+  {
     version: '0.5.0',
     date: '2025-04-15',
     changes: [
