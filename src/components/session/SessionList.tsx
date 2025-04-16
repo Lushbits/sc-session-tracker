@@ -6,6 +6,7 @@ import { SessionListTable } from './SessionListTable'
 import { DeleteSessionDialog } from '../DeleteSessionDialog'
 import { useCaptainLogs } from '../../hooks/useCaptainLogs'
 import { SessionPagination } from './SessionPagination'
+import { UserSessionStats } from './UserSessionStats'
 
 interface SessionListProps {
   sessions: Session[]
@@ -87,6 +88,10 @@ export function SessionList({
         onCreateClick={() => setIsCreateDialogOpen(true)} 
         hasActiveSession={hasActiveSession}
       />
+
+      {/* Render the overall stats component */}
+      <UserSessionStats sessions={sessions} />
+
       <SessionListTable
         sessions={sortedAndPaginatedSessions}
         onViewSession={onViewSession}

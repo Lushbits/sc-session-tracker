@@ -12,13 +12,14 @@ export const versionHistory: VersionHistoryEntry[] = [
     date: '2025-04-16',
     changes: [
       'Added crop functionality to Captain\'s Log images',
+      'Added session stats to the session list'
     ]
   },
   {
     version: '0.5.1',
     date: '2025-04-16',
     changes: [
-      'Added Admin Dashboard with comprehensive analytics',
+      'Added Admin Dashboard with comprehensive analytics'
       ]
   },
   {
