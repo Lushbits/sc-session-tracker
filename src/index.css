@@ -250,3 +250,61 @@ input:not([cmdk-input]):focus {
 .session-delete-button:hover svg {
   color: hsl(var(--destructive));
 }
+
+/* === Gradient Border Box (Static) === */
+/* Keyframes removed as animation is not active */
+
+/* Renamed class and added padding for border thickness */
+.gradient-border-box {
+  position: relative;
+  overflow: hidden; /* Keep overflow hidden */
+  z-index: 0;
+  /* Remove direct border, it's handled by the pseudo-element */
+  border: none; 
+  /* Add padding directly to create space for the border effect */
+  padding: 1px;
+}
+
+.gradient-border-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: -1;
+  /* Define 4 linear gradients, one for each side */
+  background:
+    /* Top */
+    linear-gradient(to right, transparent, hsl(var(--primary)), transparent),
+    /* Right */
+    linear-gradient(to bottom, transparent, hsl(var(--primary)), transparent),
+    /* Bottom */
+    linear-gradient(to left, transparent, hsl(var(--primary)), transparent),
+    /* Left */
+    linear-gradient(to top, transparent, hsl(var(--primary)), transparent);
+  
+  /* Set static positions for gradients to create border effect */
+  /* Positions are now set to cover the edges */
+  background-position:
+    0 0,    /* Top */
+    100% 0, /* Right */
+    0 100%, /* Bottom */
+    0 0;    /* Left */
+  
+  /* Set size of each gradient line (border thickness) */
+  background-size: 100% 1px, 1px 100%, 100% 1px, 1px 100%;
+  background-repeat: no-repeat;
+  
+  /* Animation properties removed */
+  
+  /* Ensure the pseudo-element follows the parent's border-radius */
+  border-radius: inherit; 
+}
+
+/* Ensure inner content is visually correct */
+.inner-content {
+  position: relative;
+  z-index: 1; /* Ensure it's above the ::before pseudo-element */
+  /* Background should match the card or intended background */
+  /* background-color: hsl(var(--card)); */ /* Already set inline, but good practice */
+  /* Ensure border-radius matches visually */
+  /* border-radius: inherit; */ /* Handled inline */
+}
