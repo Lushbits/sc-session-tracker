@@ -15,7 +15,10 @@ interface MainMenuProps {
 }
 
 export function MainMenu({ onShowFeedback }: MainMenuProps) {
-  const { signOut } = useAuth()
+  const { signOut, user } = useAuth()
+  
+  // Check if current user is the owner
+  const isOwner = user?.id === import.meta.env.VITE_OWNER_USER_ID
 
   return (
     <DropdownMenu>
@@ -30,6 +33,16 @@ export function MainMenu({ onShowFeedback }: MainMenuProps) {
             <div className="flex w-full cursor-pointer items-center">Friends List</div>
           </Link>
         </DropdownMenuItem>
+        
+        {/* Owner-only dashboard link */}
+        {isOwner && (
+          <DropdownMenuItem asChild>
+            <Link href="/owner-dashboard">
+              <div className="flex w-full cursor-pointer items-center">Owner Dashboard</div>
+            </Link>
+          </DropdownMenuItem>
+        )}
+        
         <DropdownMenuItem onSelect={onShowFeedback} className="cursor-pointer">
           Give Feedback
         </DropdownMenuItem>

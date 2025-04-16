@@ -19,6 +19,8 @@ import { FriendsPage } from './pages/friends'
 import { FriendLogsGrid } from './components/friend-logs/friend-logs-grid'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PublicLogView } from './components/public-log-view'
+import { OwnerRoute } from './components/OwnerRoute'
+import { OwnerDashboard } from './pages/owner-dashboard'
 
 function Redirect({ to }: { to: string }) {
   const [_, setLocation] = useLocation();
@@ -252,6 +254,12 @@ function App() {
                   <Route path="/friends">
                     <FriendsPage />
                   </Route>
+                  
+                  {/* Owner-only route */}
+                  <OwnerRoute path="/owner-dashboard">
+                    <OwnerDashboard />
+                  </OwnerRoute>
+                  
                   <Route path="/friends-logs">
                     <FriendLogsGrid />
                   </Route>
