@@ -27,3 +27,7 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# MCP / editor configs that may contain secret tokens
+.cursor/mcp.json
+.mcp.local.json
